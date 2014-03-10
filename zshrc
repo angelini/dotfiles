@@ -18,7 +18,7 @@ alias bx="bundle exec"
 # alias vim="mvim"
 # alias vi="mvim"
 # alias vc="/usr/bin/vi"
-alias vs="cd ~/src/vagrant && vagrant ssh"
+alias vs="cd ~/src/vagrant && vagrant ssh -c zsh"
 
 bindkey "^[^[[C" forward-word
 bindkey "^[^[[D" backward-word
