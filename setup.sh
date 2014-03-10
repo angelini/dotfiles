@@ -47,11 +47,13 @@ then
     echo "Set default shell: sudo chsh -s /bin/zsh"
 fi
 
-# Install vim plugins
-vim +BundleInstall +qall
-
 # Update submodules
 git submodule init
 git submodule update
 
 link "zprezto"
+
+# Install vim plugins
+mkdir -p vim/bundle
+cp -r vundle vim/bundle
+vim +BundleInstall +qall
