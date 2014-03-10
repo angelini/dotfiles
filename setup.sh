@@ -32,7 +32,6 @@ require "vim"
 require "rbenv"
 
 link "agignore"
-link "gitignore"
 link "jshintrc"
 link "gitignore_global"
 link "tmux.conf"
