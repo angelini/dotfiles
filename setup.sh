@@ -48,8 +48,8 @@ then
 fi
 
 # Update submodules
-git submodule init
-git submodule update
+git submodule init 1>/dev/null
+git submodule update 1>/dev/null
 
 link "zprezto"
 
