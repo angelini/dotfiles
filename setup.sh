@@ -1,19 +1,12 @@
 #!/bin/bash
 
-DEV="1"
+# DEV="1"
 
-HOME="~"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ ${DEV} ]
 then
     HOME="${DIR}/dev"
-fi
-
-if [[ ${EUID} -ne 0 && ! ${DEV} ]]
-then
-    echo 1>&2 "Script must be run as root"
-    exit 1
 fi
 
 require () {
@@ -29,7 +22,7 @@ link () {
 
     if [ ! -f ${TARGET} ]
     then
-        ln -s "${DIR}/${1}" ${TARGET}
+        ln -s "${DIR}/${1}" "${TARGET}"
     fi
 }
 
@@ -51,7 +44,7 @@ link "zpreztorc"
 # Setup default shell
 if [ ${SHELL} != "/bin/zsh" ]
 then
-    chsh -s /bin/zsh
+    echo "Set default shell: sudo chsh -s /bin/zsh"
 fi
 
 # Install vim plugins
