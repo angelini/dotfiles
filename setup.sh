@@ -44,7 +44,7 @@ link "zpreztorc"
 # Setup default shell
 if [ ${SHELL} != "/bin/zsh" ]
 then
-    echo "Set default shell: sudo chsh -s /bin/zsh"
+    chsh -s /bin/zsh
 fi
 
 # Update submodules
