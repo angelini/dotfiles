@@ -1,0 +1,12 @@
+[push]
+    default = current
+[user]
+    name = Alex Angelini
+    email = alex.louis.angelini@gmail.com
+[color]
+    ui = true
+[core]
+    editor = mvim
+    excludesfile = /Users/alexangelini/.gitignore_global
+[hub]
+    protocol = https

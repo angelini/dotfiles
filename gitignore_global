@@ -1,0 +1,4 @@
+.agignore
+.ruby-version
+.DS_Store
+.DS_Store?
