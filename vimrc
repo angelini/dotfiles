@@ -38,6 +38,7 @@ set showmode
 set history=1000
 set autoread
 set ignorecase
+set mouse=a
 
 " Color
 set background=dark
