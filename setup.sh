@@ -33,6 +33,7 @@ require "rbenv"
 
 link "agignore"
 link "jshintrc"
+link "gitconfig"
 link "gitignore_global"
 link "tmux.conf"
 link "tmux-osx.conf"
