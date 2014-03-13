@@ -15,10 +15,14 @@ alias gs="git status"
 alias gc="git checkout"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
 alias bx="bundle exec"
-# alias vim="mvim"
-# alias vi="mvim"
-# alias vc="/usr/bin/vi"
 alias vs="cd ~/src/vagrant && vagrant ssh"
+
+# OSX Vim alias
+if [[ $( uname ) == "Darwin" ]]; then
+    alias vim="mvim -v"
+fi
+
+alias vi="vim"
 
 bindkey "^[^[[C" forward-word
 bindkey "^[^[[D" backward-word
