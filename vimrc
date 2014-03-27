@@ -62,6 +62,10 @@ set softtabstop=4
 set tabstop=4
 set expandtab
 
+" Bells
+set noerrorbells visualbell t_vb=
+autocmd GUIEnter * set visualbell t_vb=
+
 " Visual trailing spaces
 set list listchars=tab:\ \ ,trail:·
 
