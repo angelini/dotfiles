@@ -30,6 +30,7 @@ require "tmux"
 require "zsh"
 require "vim"
 require "rbenv"
+require "reattach-to-user-namespace"
 
 link "agignore"
 link "jshintrc"
@@ -58,4 +59,4 @@ git submodule update 1>/dev/null
 link "zprezto"
 
 # Install vim plugins
-vim +BundleInstall +qall
+vim +PluginInstall +qall
