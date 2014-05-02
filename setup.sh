@@ -48,6 +48,9 @@ then
     chsh -s /bin/zsh
 fi
 
+# Create directory for vundle to be cloned into
+mkdir -p vim/bundle
+
 # Update submodules
 git submodule init 1>/dev/null
 git submodule update 1>/dev/null
@@ -55,6 +58,4 @@ git submodule update 1>/dev/null
 link "zprezto"
 
 # Install vim plugins
-mkdir -p vim/bundle
-cp -r vundle vim/bundle
 vim +BundleInstall +qall
