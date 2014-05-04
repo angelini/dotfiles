@@ -30,7 +30,6 @@ require "tmux"
 require "zsh"
 require "vim"
 require "rbenv"
-require "reattach-to-user-namespace"
 
 link "agignore"
 link "jshintrc"
