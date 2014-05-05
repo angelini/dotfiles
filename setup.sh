@@ -59,3 +59,9 @@ link "zprezto"
 
 # Install vim plugins
 vim +PluginInstall +qall
+
+# Build matcher
+cd matcher
+make
+sudo make install
+cd ..
