@@ -15,6 +15,8 @@ alias gs="git status"
 alias gc="git checkout"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
 alias bx="bundle exec"
+alias bs="bundle exec spring"
+alias bt="bundle exec spring testunit"
 alias vs="cd ~/src/vagrant && vagrant ssh"
 
 # OSX Vim alias
