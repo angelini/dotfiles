@@ -40,6 +40,9 @@ export PATH="/Applications/Postgres93.app/Contents/MacOS/bin:$PATH"
 export LINEMAN_AUTO_START=false
 export LINEMAN_AUTO_WATCH=false
 
+# Golang
+export GOPATH=$HOME/.go
+
 # History
 setopt inc_append_history
 setopt share_history

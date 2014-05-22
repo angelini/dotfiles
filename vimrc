@@ -19,6 +19,7 @@ Plugin 'bling/vim-airline'
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-fugitive'
 Plugin 'Lokaltog/vim-easymotion'
+Plugin 'Valloric/YouCompleteMe'
 
 " Languages
 Plugin 'kchmck/vim-coffee-script'
@@ -104,7 +105,7 @@ let g:ctrlp_custom_ignore = '\v[\/](\.git|venv)$'
 
 " Syntastic
 let g:syntastic_mode_map = { 'mode': 'active',
-                           \ 'passive_filetypes': ['html', 'coffee'] }
+                           \ 'passive_filetypes': ['html', 'ruby'] }
 
 " Global clipboard
 set clipboard+=unnamed
@@ -119,6 +120,9 @@ let g:vim_markdown_folding_disabled=1
 let g:dash_map = {
         \ 'javascript' : 'js'
         \ }
+
+" YCM
+let g:ycm_filetype_specific_completion_to_disable = { 'ruby': 1 }
 
 " Matcher Integration
 let g:path_to_matcher = "/usr/local/bin/matcher"
