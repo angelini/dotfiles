@@ -30,7 +30,6 @@ require "tmux"
 require "zsh"
 require "vim"
 require "rbenv"
-require "reattach-to-user-namespace"
 
 link "agignore"
 link "jshintrc"
@@ -38,6 +37,7 @@ link "gitconfig"
 link "gitignore_global"
 link "tmux.conf"
 link "tmux-osx.conf"
+link "tmux-linux.conf"
 link "vimrc"
 link "vim"
 link "zshrc"
@@ -60,3 +60,9 @@ link "zprezto"
 
 # Install vim plugins
 vim +PluginInstall +qall
+
+# Build matcher
+cd matcher
+make
+sudo make install
+cd ..
