@@ -48,3 +48,6 @@ export GOPATH=$HOME/.go
 # History
 setopt inc_append_history
 setopt share_history
+
+# Shopify
+export IM_ALREADY_PRO_THANKS=true
