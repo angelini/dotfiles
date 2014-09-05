@@ -11,13 +11,16 @@ export KEYTIMEOUT=1
 
 # Aliases
 alias l="ls -A"
-alias gs="git status"
+alias gs="git status -uno"
 alias gc="git checkout"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
 alias bx="bundle exec"
 alias bs="bundle exec spring"
 alias bt="bundle exec spring testunit"
 alias vs="cd ~/src/vagrant && vagrant ssh"
+alias cs="cd ~/src/shopify"
+alias ac="ag -G coffee"
+alias ar="ag -G rb"
 
 # OSX Vim alias
 if [[ $( uname ) == "Darwin" ]]; then
@@ -36,7 +39,7 @@ export PATH=$HOME/.rbenv/bin:$PATH
 eval "$(rbenv init -)"
 
 # Postgres.app
-export PATH="/Applications/Postgres93.app/Contents/MacOS/bin:$PATH"
+export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:$PATH"
 
 # Lineman
 export LINEMAN_AUTO_START=false

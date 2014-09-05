@@ -20,6 +20,7 @@ Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-fugitive'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'Valloric/YouCompleteMe'
+Plugin 'gregsexton/MatchTag'
 
 " Languages
 Plugin 'kchmck/vim-coffee-script'
@@ -82,6 +83,11 @@ silent !mkdir ~/.vim/backups > /dev/null 2>&1
 set undodir=~/.vim/backups
 set undofile
 
+" Status line
+set laststatus=2
+set statusline+=%f
+let g:airline_theme = 'simple'
+
 " Wrap
 set nowrap
 set linebreak
@@ -123,6 +129,9 @@ let g:dash_map = {
 
 " YCM
 let g:ycm_filetype_specific_completion_to_disable = { 'ruby': 1 }
+
+" Remove bash errors
+let g:sh_no_error=1
 
 " Matcher Integration
 let g:path_to_matcher = "/usr/local/bin/matcher"
