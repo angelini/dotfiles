@@ -48,6 +48,10 @@ export LINEMAN_AUTO_WATCH=false
 # Golang
 export GOPATH=$HOME/.go
 
+# Python
+export WORKON_HOME=~/.virtualenvs
+source $(brew --prefix)/bin/virtualenvwrapper.sh
+
 # History
 setopt inc_append_history
 setopt share_history

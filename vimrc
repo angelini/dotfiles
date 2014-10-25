@@ -19,7 +19,6 @@ Plugin 'bling/vim-airline'
 Plugin 'tpope/vim-commentary'
 Plugin 'tpope/vim-fugitive'
 Plugin 'Lokaltog/vim-easymotion'
-Plugin 'Valloric/YouCompleteMe'
 Plugin 'gregsexton/MatchTag'
 
 " Languages
@@ -126,9 +125,6 @@ let g:vim_markdown_folding_disabled=1
 let g:dash_map = {
         \ 'javascript' : 'js'
         \ }
-
-" YCM
-let g:ycm_filetype_specific_completion_to_disable = { 'ruby': 1 }
 
 " Remove bash errors
 let g:sh_no_error=1
