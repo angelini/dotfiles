@@ -44,7 +44,7 @@ set ignorecase
 set mouse=a
 
 " Color
-set background=dark
+set background=light
 colorscheme desert
 
 " Search settings
@@ -85,7 +85,7 @@ set undofile
 " Status line
 set laststatus=2
 set statusline+=%f
-let g:airline_theme = 'simple'
+let g:airline_theme = 'solarized'
 
 " Wrap
 set nowrap

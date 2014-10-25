@@ -32,6 +32,7 @@ require "vim"
 require "rbenv"
 
 link "agignore"
+link "emacs.el"
 link "jshintrc"
 link "gitconfig"
 link "gitignore_global"
