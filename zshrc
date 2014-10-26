@@ -50,7 +50,10 @@ export GOPATH=$HOME/.go
 
 # Python
 export WORKON_HOME=~/.virtualenvs
-source $(brew --prefix)/bin/virtualenvwrapper.sh
+if hash brew 2>/dev/null
+then
+    source $(brew --prefix)/bin/virtualenvwrapper.sh
+fi
 
 # History
 setopt inc_append_history
