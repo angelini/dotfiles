@@ -4,14 +4,14 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
 fi
 
 # Vi Mode
-bindkey -v
+# bindkey -v
 bindkey '^r' history-incremental-search-backward
 
 export KEYTIMEOUT=1
 
 # Aliases
 alias l="ls -A"
-alias gs="git status -uno"
+alias gs="git status"
 alias gc="git checkout"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
 alias bx="bundle exec"
