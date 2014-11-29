@@ -83,4 +83,5 @@ if [[ "${OSTYPE}" == "darwin" ]]; then
 
   osx_install "ag"
   osx_install "emacs"
+  osx_install "reattach-to-user-namespace"
 fi
