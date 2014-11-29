@@ -1,69 +1,86 @@
 #!/bin/bash
 
-# DEV="1"
-
+echo "= angelini/dotfiles"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ ${DEV} ]
-then
-    HOME="${DIR}/dev"
+if [[ "${DEV}" ]]; then
+  echo "= DEV"
+  HOME="${DIR}/dev"
 fi
 
-require () {
-    if ! hash ${1} 2>/dev/null
-    then
-        echo 1>&2 "Missing requirement ${1}"
-        exit 1
-    fi
-}
-
 link () {
-    TARGET="${HOME}/.${1}"
+  TARGET="${HOME}/.${1}"
 
-    if [ ! -f ${TARGET} ]
-    then
-        ln -s "${DIR}/${1}" "${TARGET}"
-    fi
+  if [[ ! -f "${TARGET}" ]]; then
+    echo "- linking ${TARGET}"
+    ln -s "${DIR}/${1}" "${TARGET}"
+  fi
 }
 
-require "tmux"
-require "zsh"
-require "vim"
-require "rbenv"
+install() {
+  INSTALLER="${1}"
+  EXECUTABLE="${2}"
+  [[ -n "${3}" ]] && PACKAGE="${3}" || PACKAGE="${2}"
 
+  if ! hash "${EXECUTABLE}" 2> /dev/null; then
+      echo "- installing ${EXECUTABLE}"
+      ${INSTALLER} "${PACKAGE}" 1> /dev/null
+  fi
+}
+
+linux_install() {
+  install "sudo apt-get install -y" "${1}" "${2}"
+}
+
+osx_install() {
+  install "brew install" "${1}" "${2}"
+}
+
+# Install emacs-config
+echo "= emacs-config"
+EMACS_DIR="${DIR}/../emacs-config"
+
+if [[ ! -d "${EMACS_DIR}" ]]; then
+  echo "- cloning"
+  git clone git@github.com:angelini/emacs-config.git "${EMACS_DIR}" 1> /dev/null
+  echo "- linking"
+  ln -s "${EMACS_DIR}" "${HOME}/.emacs.d"
+fi
+
+echo "= dotfiles"
+link "profile"
 link "agignore"
-link "emacs.el"
 link "jshintrc"
+
 link "gitconfig"
 link "gitignore_global"
+
 link "tmux.conf"
 link "tmux-osx.conf"
 link "tmux-linux.conf"
-link "vimrc"
-link "vim"
-link "zshrc"
-link "zpreztorc"
 
-# Setup default shell
-if [ ${SHELL} != "/bin/zsh" ]
-then
-    chsh -s /bin/zsh
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+  echo "= linux"
+  echo "- updating"
+  sudo apt-get update 1> /dev/null
+
+  linux_install "ag" "silversearcher-ag"
+  linux_install "emacs"
+  linux_install "rbenv"
+  linux_install "rbenv" "ruby-build"
 fi
 
-# Create directory for vundle to be cloned into
-mkdir -p vim/bundle
+if [[ "${OSTYPE}" == "darwin" ]]; then
+  echo "= osx"
 
-# Update submodules
-git submodule init 1>/dev/null
-git submodule update 1>/dev/null
+  if hash brew 2> /dev/null; then
+    echo "- installing brew"
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 1> /dev/null
+  fi
 
-link "zprezto"
+  echo "-updating"
+  brew update 1> /dev/null
 
-# Install vim plugins
-vim +PluginInstall +qall
-
-# Build matcher
-cd matcher
-make
-sudo make install
-cd ..
+  osx_install "ag"
+  osx_install "emacs"
+fi
