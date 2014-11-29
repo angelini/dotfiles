@@ -8,6 +8,25 @@ if [[ "${DEV}" ]]; then
   HOME="${DIR}/dev"
 fi
 
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+  echo "= linux"
+  UPDATE="sudo apt-get update"
+  INSTALL="sudo apt-get install -y"
+  CHECK="dpkg -s"
+fi
+
+if [[ "${OSTYPE}" == "darwin" ]]; then
+  echo "= osx"
+  UPDATE="brew update"
+  INSTALL="brew install"
+  CHECK="brew ls --versions"
+
+  if hash brew 2> /dev/null; then
+    echo "- installing brew"
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 1> /dev/null
+  fi
+fi
+
 link () {
   TARGET="${HOME}/.${1}"
 
@@ -17,26 +36,20 @@ link () {
   fi
 }
 
-install() {
-  INSTALLER="${1}"
-  EXECUTABLE="${2}"
-  [[ -n "${3}" ]] && PACKAGE="${3}" || PACKAGE="${2}"
+update() {
+  echo "- updating"
+  ${UPDATE} 1> /dev/null
+}
 
-  if ! hash "${EXECUTABLE}" 2> /dev/null; then
-      echo "- installing ${EXECUTABLE}"
-      ${INSTALLER} "${PACKAGE}" 1> /dev/null
+install() {
+  PACKAGE="${1}"
+
+  if ! ${CHECK} "${PACKAGE}" > /dev/null 2>&1; then
+      echo "- installing ${PACKAGE}"
+      ${INSTALL} "${PACKAGE}" 1> /dev/null
   fi
 }
 
-linux_install() {
-  install "sudo apt-get install -y" "${1}" "${2}"
-}
-
-osx_install() {
-  install "brew install" "${1}" "${2}"
-}
-
-# Install emacs-config
 echo "= emacs-config"
 EMACS_DIR="${DIR}/../emacs-config"
 
@@ -59,29 +72,14 @@ link "tmux.conf"
 link "tmux-osx.conf"
 link "tmux-linux.conf"
 
-if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-  echo "= linux"
-  echo "- updating"
-  sudo apt-get update 1> /dev/null
-
-  linux_install "ag" "silversearcher-ag"
-  linux_install "emacs"
-  linux_install "rbenv"
-  linux_install "rbenv" "ruby-build"
-fi
+echo "= installer"
+update
+install "silversearcher-ag"
+install "emacs"
+install "rbenv"
+install "ruby-build"
+install "bash-completion"
 
 if [[ "${OSTYPE}" == "darwin" ]]; then
-  echo "= osx"
-
-  if hash brew 2> /dev/null; then
-    echo "- installing brew"
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 1> /dev/null
-  fi
-
-  echo "-updating"
-  brew update 1> /dev/null
-
-  osx_install "ag"
-  osx_install "emacs"
-  osx_install "reattach-to-user-namespace"
+  install "reattach-to-user-namespace"
 fi
