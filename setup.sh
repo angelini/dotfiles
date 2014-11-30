@@ -79,6 +79,7 @@ install "emacs"
 install "rbenv"
 install "ruby-build"
 install "bash-completion"
+install "tree"
 
 if [[ "${OSTYPE}" == "darwin" ]]; then
   install "reattach-to-user-namespace"
