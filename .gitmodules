@@ -1,9 +1,0 @@
-[submodule "zprezto"]
-	path = zprezto
-	url = https://github.com/sorin-ionescu/prezto
-[submodule "matcher"]
-	path = matcher
-	url = https://github.com/burke/matcher
-[submodule "vundle"]
-	path = vim/bundle/Vundle.vim
-	url = https://github.com/gmarik/Vundle.vim

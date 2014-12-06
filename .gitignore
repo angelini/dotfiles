@@ -1,4 +1,3 @@
-vim/bundle
-vim/backups
-vim/.netrwhist
 dev
+emacs-24.4
+bash-git-prompt
