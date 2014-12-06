@@ -29,7 +29,20 @@ export GOPATH="${HOME}/.go"
 # Shopify
 export IM_ALREADY_PRO_THANKS=true
 
-if [[ "${OSTYPE}" == "darwin" ]]; then
-  # Postgres.app
+# Prompt
+GIT_PROMPT_DIR="${HOME}/.bash-git-prompt"
+if [[ -d "${GIT_PROMPT_DIR}" ]]; then
+  source "${GIT_PROMPT_DIR}/gitprompt.sh"
+fi
+
+# Bash completions
+BASH_COMPLETION="/usr/share/bash-completion/bash_completion"
+if [[ -f "${BASH_COMPLETION}" ]]; then
+  source "${BASH_COMPLETION}"
+fi
+
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+  export PATH="/opt/emacs/bin:${PATH}"
+elif [[ "${OSTYPE}" == "darwin" ]]; then
   export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:${PATH}"
 fi
