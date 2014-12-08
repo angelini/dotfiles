@@ -96,6 +96,7 @@ fi
 echo "= dotfiles"
 link "profile"
 link "agignore"
+link "flake8.rc"
 link "jshintrc"
 
 link "gitconfig"

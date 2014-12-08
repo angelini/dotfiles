@@ -28,6 +28,7 @@ export GOPATH="${HOME}/.go"
 
 # Shopify
 export IM_ALREADY_PRO_THANKS=true
+export NO_AUTOLINT=true
 
 # Prompt
 GIT_PROMPT_DIR="${HOME}/.bash-git-prompt"
