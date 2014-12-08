@@ -37,9 +37,16 @@ if [[ -d "${GIT_PROMPT_DIR}" ]]; then
 fi
 
 # Bash completions
-BASH_COMPLETION="/usr/share/bash-completion/bash_completion"
-if [[ -f "${BASH_COMPLETION}" ]]; then
-  source "${BASH_COMPLETION}"
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+  BASH_COMPLETION_FILE="/usr/share/bash-completion/bash_completion"
+elif [[ "${OSTYPE}" == "darwin"* ]]; then
+  if hash brew 2> /dev/null; then
+    BASH_COMPLETION_FILE="$(brew --prefix)/etc/bash_completion"
+  fi
+fi
+
+if [[ -f "${BASH_COMPLETION_FILE}" ]]; then
+  source "${BASH_COMPLETION_FILE}"
 fi
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
