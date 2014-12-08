@@ -13,13 +13,13 @@ if [[ "${OSTYPE}" == "linux-gnu" ]]; then
   UPDATE="sudo apt-get update"
   INSTALL="sudo apt-get install -y"
   CHECK="dpkg -s"
-elif [[ "${OSTYPE}" == "darwin" ]]; then
+elif [[ "${OSTYPE}" == "darwin"* ]]; then
   echo "= osx"
   UPDATE="brew update"
   INSTALL="brew install"
   CHECK="brew ls --versions"
 
-  if hash brew 2> /dev/null; then
+  if ! hash brew 2> /dev/null; then
     echo "- installing brew"
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 1> /dev/null
   fi
@@ -108,7 +108,6 @@ link "tmux-linux.conf"
 
 echo "= installer"
 update
-install "silversearcher-ag"
 install "rbenv"
 install "ruby-build"
 install "bash-completion"
@@ -116,7 +115,9 @@ install "tree"
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
   install_emacs_source "/opt/emacs"
-elif [[ "${OSTYPE}" == "darwin" ]]; then
+  install "silversearcher-ag"
+elif [[ "${OSTYPE}" == "darwin"* ]]; then
   install "emacs"
+  install "the_silver_searcher"
   install "reattach-to-user-namespace"
 fi

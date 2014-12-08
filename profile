@@ -44,6 +44,6 @@ fi
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
   export PATH="/opt/emacs/bin:${PATH}"
-elif [[ "${OSTYPE}" == "darwin" ]]; then
+elif [[ "${OSTYPE}" == "darwin"* ]]; then
   export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:${PATH}"
 fi
