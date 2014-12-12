@@ -10,6 +10,13 @@ alias vs="cd ~/src/vagrant && vagrant ssh"
 alias cs="cd ~/src/starscream"
 
 PATH="${HOME}/bin:${PATH}"
+# Bash history
+export HISTCONTROL=ignoredups:erasedups
+export HISTSIZE=100000
+export HISTFILESIZE=100000
+shopt -s histappend
+
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 # Ruby
 export PATH="${HOME}/.rbenv/bin:${PATH}"
