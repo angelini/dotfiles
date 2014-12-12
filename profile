@@ -9,14 +9,14 @@ alias bt="bundle exec spring testunit"
 alias vs="cd ~/src/vagrant && vagrant ssh"
 alias cs="cd ~/src/starscream"
 
-export PATH="${HOME}/bin:${PATH}"
+export PATH="${HOME}/bin:/usr/local/bin:${PATH}"
 export EDITOR=emacs
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
   PREFIX="/usr/share"
   export PATH="/opt/emacs/bin:${PATH}"
 elif [[ "${OSTYPE}" == "darwin"* ]]; then
-  PREFIX="$(brew --prefix)"
+  PREFIX="/usr/local"
   export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:${PATH}"
 fi
 
@@ -49,6 +49,7 @@ export NO_AUTOAUTOLINT=true
 
 # Prompt
 GIT_PROMPT_DIR="${HOME}/.bash-git-prompt"
+
 if [[ -d "${GIT_PROMPT_DIR}" ]]; then
   source "${GIT_PROMPT_DIR}/gitprompt.sh"
 fi
