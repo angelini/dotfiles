@@ -9,7 +9,17 @@ alias bt="bundle exec spring testunit"
 alias vs="cd ~/src/vagrant && vagrant ssh"
 alias cs="cd ~/src/starscream"
 
-PATH="${HOME}/bin:${PATH}"
+export PATH="${HOME}/bin:${PATH}"
+export EDITOR=emacs
+
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+  PREFIX="/usr/share"
+  export PATH="/opt/emacs/bin:${PATH}"
+elif [[ "${OSTYPE}" == "darwin"* ]]; then
+  PREFIX="$(brew --prefix)"
+  export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:${PATH}"
+fi
+
 # Bash history
 export HISTCONTROL=ignoredups:erasedups
 export HISTSIZE=100000
@@ -27,7 +37,7 @@ fi
 # Python
 export WORKON_HOME="~/.virtualenvs"
 if hash brew 2> /dev/null; then
-  source "$(brew --prefix)/bin/virtualenvwrapper.sh"
+  source "${PREFIX}/bin/virtualenvwrapper.sh"
 fi
 
 # Golang
@@ -35,7 +45,7 @@ export GOPATH="${HOME}/.go"
 
 # Shopify
 export IM_ALREADY_PRO_THANKS=true
-export NO_AUTOLINT=true
+export NO_AUTOAUTOLINT=true
 
 # Prompt
 GIT_PROMPT_DIR="${HOME}/.bash-git-prompt"
@@ -45,19 +55,11 @@ fi
 
 # Bash completions
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-  BASH_COMPLETION_FILE="/usr/share/bash-completion/bash_completion"
+  BASH_COMPLETION_FILE="${PREFIX}/bash-completion/bash_completion"
 elif [[ "${OSTYPE}" == "darwin"* ]]; then
-  if hash brew 2> /dev/null; then
-    BASH_COMPLETION_FILE="$(brew --prefix)/etc/bash_completion"
-  fi
+  BASH_COMPLETION_FILE="${PREFIX}/etc/bash_completion"
 fi
 
 if [[ -f "${BASH_COMPLETION_FILE}" ]]; then
   source "${BASH_COMPLETION_FILE}"
-fi
-
-if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-  export PATH="/opt/emacs/bin:${PATH}"
-elif [[ "${OSTYPE}" == "darwin"* ]]; then
-  export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:${PATH}"
 fi
