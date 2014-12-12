@@ -58,7 +58,7 @@ pip_install() {
 }
 
 install_pip() {
-  if hash pip 2> /dev/null; then
+  if ! hash pip 2> /dev/null; then
     echo "- installing pip"
     curl -O -s https://bootstrap.pypa.io/get-pip.py
     python get-pip.py > /dev/null
@@ -90,6 +90,7 @@ pip_install "virtualenv"
 pip_install "virtualenvwrapper"
 
 echo "= dotfiles"
+rm "${HOME}/.profile" &> /dev/null
 link "profile"
 link "agignore"
 link "flake8.rc"
