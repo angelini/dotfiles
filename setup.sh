@@ -42,9 +42,9 @@ update() {
 install() {
   PACKAGE="${1}"
 
-  if ! ${CHECK} "${PACKAGE}" > /dev/null 2>&1; then
+  if ! ${CHECK} "${PACKAGE}" &> /dev/null; then
       echo "- installing ${PACKAGE}"
-      ${INSTALL} "${PACKAGE}" 1> /dev/null
+      ${INSTALL} "${PACKAGE}" > /dev/null
   fi
 }
 
@@ -54,8 +54,8 @@ install_emacs_source() {
   if [[ ! -d "${TARGET}" ]]; then
     echo "- installing emacs (from source)"
     echo "-- installing deps"
-    sudo apt-get install -y build-essential 1> /dev/null
-    sudo apt-get build-dep -y emacs24 1> /dev/null
+    sudo apt-get install -y build-essential > /dev/null
+    sudo apt-get build-dep -y emacs24 > /dev/null
 
     echo "-- fetching source"
     curl -O -s http://ftp.gnu.org/gnu/emacs/emacs-24.4.tar.gz
@@ -65,11 +65,11 @@ install_emacs_source() {
     cd emacs-24.4
 
     echo "-- configuring"
-    ./configure --prefix=/opt/emacs 1> /dev/null
+    ./configure --prefix=/opt/emacs > /dev/null
 
     echo "-- compiling"
-    make 1> /dev/null
-    sudo make install 1> /dev/null
+    make > /dev/null
+    sudo make install > /dev/null
 
     cd ..
   fi
