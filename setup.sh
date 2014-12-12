@@ -43,8 +43,17 @@ install() {
   PACKAGE="${1}"
 
   if ! ${CHECK} "${PACKAGE}" &> /dev/null; then
-      echo "- installing ${PACKAGE}"
-      ${INSTALL} "${PACKAGE}" > /dev/null
+    echo "- installing ${PACKAGE}"
+    ${INSTALL} "${PACKAGE}" > /dev/null
+  fi
+}
+
+pip_install() {
+  MODULE="${1}"
+
+  if [[ -z "$(pip show ${MODULE})" ]]; then
+    echo "- pip installing ${MODULE}"
+    pip install "${MODULE}" > /dev/null
   fi
 }
 
@@ -75,6 +84,15 @@ install_emacs_source() {
   fi
 }
 
+install_pip() {
+  if hash pip 2> /dev/null; then
+    echo "- installing pip"
+    curl -O -s https://bootstrap.pypa.io/get-pip.py
+    python get-pip.py > /dev/null
+    rm get-pip.py
+  fi
+}
+
 echo "= emacs-config"
 EMACS_DIR="${DIR}/../emacs-config"
 
@@ -92,6 +110,11 @@ if [[ ! -d "./bash-git-prompt" ]]; then
   git clone -q https://github.com/magicmonty/bash-git-prompt.git
   link "bash-git-prompt"
 fi
+
+echo "= python"
+install_pip
+pip_install "virtualenv"
+pip_install "virtualenvwrapper"
 
 echo "= dotfiles"
 link "profile"
