@@ -57,33 +57,6 @@ pip_install() {
   fi
 }
 
-install_emacs_source() {
-  TARGET="${1}"
-
-  if [[ ! -d "${TARGET}" ]]; then
-    echo "- installing emacs (from source)"
-    echo "-- installing deps"
-    sudo apt-get install -y build-essential > /dev/null
-    sudo apt-get build-dep -y emacs24 > /dev/null
-
-    echo "-- fetching source"
-    curl -O -s http://ftp.gnu.org/gnu/emacs/emacs-24.4.tar.gz
-    tar -xzvf emacs-24.4.tar.gz
-    rm emacs-24.4.tar.gz
-
-    cd emacs-24.4
-
-    echo "-- configuring"
-    ./configure --prefix=/opt/emacs > /dev/null
-
-    echo "-- compiling"
-    make > /dev/null
-    sudo make install > /dev/null
-
-    cd ..
-  fi
-}
-
 install_pip() {
   if hash pip 2> /dev/null; then
     echo "- installing pip"
@@ -98,7 +71,7 @@ EMACS_DIR="${DIR}/../emacs-config"
 
 if [[ ! -d "${EMACS_DIR}" ]]; then
   echo "- cloning"
-  git clone git@github.com:angelini/emacs-config.git "${EMACS_DIR}" 1> /dev/null
+  git clone git@github.com:angelini/emacs-config.git "${EMACS_DIR}" > /dev/null
   echo "- linking"
   ln -s "${EMACS_DIR}" "${HOME}/.emacs.d"
 fi
@@ -137,7 +110,7 @@ install "bash-completion"
 install "tree"
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-  install_emacs_source "/opt/emacs"
+  install "emacs24-nox"
   install "silversearcher-ag"
 elif [[ "${OSTYPE}" == "darwin"* ]]; then
   install "emacs"
