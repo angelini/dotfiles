@@ -95,6 +95,7 @@ link "profile"
 link "agignore"
 link "flake8.rc"
 link "jshintrc"
+link "profile.boot"
 
 link "gitconfig"
 link "gitignore_global"

@@ -43,6 +43,9 @@ fi
 # Golang
 export GOPATH="${HOME}/.go"
 
+# Clojure/Boot
+export BOOT_JVM_OPTIONS="-client -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:MaxPermSize=128m -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Xverify:none"
+
 # Shopify
 export IM_ALREADY_PRO_THANKS=true
 export NO_AUTOAUTOLINT=true
