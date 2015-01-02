@@ -61,7 +61,7 @@ install_pip() {
   if ! hash pip 2> /dev/null; then
     echo "- installing pip"
     curl -O -s https://bootstrap.pypa.io/get-pip.py
-    python get-pip.py > /dev/null
+    sudo python get-pip.py > /dev/null
     rm get-pip.py
   fi
 }
