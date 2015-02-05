@@ -84,6 +84,14 @@ if [[ ! -d "./bash-git-prompt" ]]; then
   link "bash-git-prompt"
 fi
 
+echo "= git-bash-completion"
+
+if [[ ! -f "./git-completion.bash" ]]; then
+  echo "- downloading"
+  curl -O -s https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+  link "git-completion.bash"
+fi
+
 echo "= python"
 install_pip
 pip_install "virtualenv"

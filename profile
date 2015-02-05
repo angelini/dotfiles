@@ -65,6 +65,10 @@ elif [[ "${OSTYPE}" == "darwin"* ]]; then
   BASH_COMPLETION_FILE="${PREFIX}/etc/bash_completion"
 fi
 
+if [[ -f "${HOME}/.git-completion.bash" ]]; then
+  source "${HOME}/.git-completion.bash"
+fi
+
 if [[ -f "${BASH_COMPLETION_FILE}" ]]; then
   source "${BASH_COMPLETION_FILE}"
 fi
