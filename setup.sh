@@ -93,7 +93,7 @@ echo "= dotfiles"
 rm "${HOME}/.profile" &> /dev/null
 link "profile"
 link "agignore"
-link "flake8.rc"
+link "flake8rc"
 link "jshintrc"
 link "profile.boot"
 
