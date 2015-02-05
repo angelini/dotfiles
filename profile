@@ -49,6 +49,7 @@ export BOOT_JVM_OPTIONS="-client -XX:+TieredCompilation -XX:TieredStopAtLevel=1 
 # Shopify
 export IM_ALREADY_PRO_THANKS=true
 export NO_AUTOAUTOLINT=true
+export SPARK_HOME="${HOME}/src/starscream/spark/current"
 
 # Prompt
 GIT_PROMPT_DIR="${HOME}/.bash-git-prompt"
