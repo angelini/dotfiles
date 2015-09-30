@@ -1,5 +1,5 @@
 # Aliases
-alias l="ls -A"
+alias l="ls -hlAG"
 alias gs="git status"
 alias gc="git checkout"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
@@ -8,6 +8,7 @@ alias bs="bundle exec spring"
 alias bt="bundle exec spring testunit"
 alias vs="cd ~/src/vagrant && vagrant ssh"
 alias cs="cd ~/src/starscream"
+alias knife="BUNDLE_GEMFILE=/Users/alexangelini/.chef/Gemfile bundle exec knife"
 
 export PATH="${HOME}/bin:/usr/local/bin:${PATH}"
 export EDITOR=emacs
@@ -22,8 +23,8 @@ fi
 
 # Bash history
 export HISTCONTROL=ignoredups:erasedups
-export HISTSIZE=100000
-export HISTFILESIZE=100000
+export HISTSIZE=1000000
+export HISTFILESIZE=1000000
 shopt -s histappend
 
 export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
@@ -41,15 +42,24 @@ if hash brew 2> /dev/null; then
 fi
 
 # Golang
-export GOPATH="${HOME}/.go"
+export GOROOT="${HOME}/packages/go"
+export GOPATH="${HOME}/go"
+export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
+
+# Java
+if [[ "${OSTYPE}" == "darwin"* ]]; then
+  export JAVA_HOME=`/usr/libexec/java_home -v 1.8.0_31`
+fi
 
 # Clojure/Boot
+export LEIN_FAST_TRAMPOLINE=true
+export LEIN_JVM_OPTS=-XX:TieredStopAtLevel=1  # Causes a performance degradation for long running processes
 export BOOT_JVM_OPTIONS="-client -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:MaxPermSize=128m -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -Xverify:none"
 
 # Shopify
 export IM_ALREADY_PRO_THANKS=true
 export NO_AUTOAUTOLINT=true
-export SPARK_HOME="${HOME}/src/starscream/spark/current"
+export HADOOP_CONF_DIR="${HOME}/src/starscream/.cache/spark/current/conf/conf.cloudera.yarn"
 
 # Prompt
 GIT_PROMPT_DIR="${HOME}/.bash-git-prompt"

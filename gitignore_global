@@ -2,3 +2,5 @@
 .ruby-version
 .DS_Store
 .DS_Store?
+__scratch__.*
+.#__scratch__.*
