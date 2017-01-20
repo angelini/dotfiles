@@ -1,129 +1,116 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "* angelini/dotfiles"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [[ "${DEV}" ]]; then
-  echo "= DEV"
-  HOME="${DIR}/dev"
+    echo "= DEV"
+    HOME="${DIR}/dev"
 fi
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-  echo "= linux"
-  UPDATE="sudo apt-get update"
-  INSTALL="sudo apt-get install -y"
-  CHECK="dpkg -s"
+    echo "= linux"
+    UPDATE="sudo yaourt -Syu --noconfirm"
+    INSTALL="sudo yaourt -Sy --noconfirm"
+    CHECK="yaourt -Qs"
 elif [[ "${OSTYPE}" == "darwin"* ]]; then
-  echo "= osx"
-  UPDATE="brew update"
-  INSTALL="brew install"
-  CHECK="brew ls --versions"
-
-  if ! hash brew 2> /dev/null; then
-    echo "- installing brew"
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 1> /dev/null
-  fi
+    echo "= osx"
+    UPDATE="brew update"
+    INSTALL="brew install"
+    CHECK="brew ls --versions"
+    if ! hash brew 2> /dev/null; then
+        echo "- installing brew"
+        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 1> /dev/null
+    fi
 fi
 
 link () {
-  TARGET="${HOME}/.${1}"
-
-  if [[ ! -f "${TARGET}" ]]; then
-    echo "- linking ${TARGET}"
-    ln -s "${DIR}/${1}" "${TARGET}"
-  fi
-}
-
-update() {
-  echo "- updating"
-  ${UPDATE} 1> /dev/null
+    local target="${HOME}/.${1}"
+    if [[ ! -f "${target}" ]]; then
+        echo "- linking ${target}"
+        ln -s "${DIR}/${1}" "${target}"
+    fi
 }
 
 install() {
-  PACKAGE="${1}"
-
-  if ! ${CHECK} "${PACKAGE}" &> /dev/null; then
-    echo "- installing ${PACKAGE}"
-    ${INSTALL} "${PACKAGE}" > /dev/null
-  fi
+    local package="${1}"
+    if ! ${CHECK} "${package}" &> /dev/null; then
+        echo "- installing ${package}"
+        if [[ "${2}" ]]; then
+            yaourt -Sy --noconfirm "${package}" > /dev/null
+        else
+            ${INSTALL} "${package}" > /dev/null
+        fi
+    fi
 }
 
-pip_install() {
-  MODULE="${1}"
-
-  if [[ -z "$(pip show ${MODULE})" ]]; then
-    echo "- pip installing ${MODULE}"
-    pip install "${MODULE}" > /dev/null
-  fi
+install_pyenv() {
+    local pyenv_dir="${HOME}/.pyenv"
+    if ! hash pyenv 2> /dev/null; then
+        echo "- installing pyenv"
+        git clone -q https://github.com/yyuu/pyenv.git "${pyenv_dir}"
+        git clone -q https://github.com/yyuu/pyenv-virtualenv.git "${pyenv_dir}/plugins/pyenv-virtualenv"
+    fi
 }
 
-install_pip() {
-  if ! hash pip 2> /dev/null; then
-    echo "- installing pip"
-    curl -O -s https://bootstrap.pypa.io/get-pip.py
-    sudo python get-pip.py > /dev/null
-    rm get-pip.py
-  fi
+install_bash_git_prompt() {
+    if [[ ! -d "./bash-git-prompt" ]]; then
+        echo "- installing bash-git-prompt"
+        git clone -q https://github.com/magicmonty/bash-git-prompt.git
+        link "bash-git-prompt"
+    fi
+
+    if [[ ! -f "./git-completion.bash" ]]; then
+        echo "- installing git-bash-completion"
+        curl -O -sSf https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+        link "git-completion.bash"
+    fi
 }
 
-echo "= emacs-config"
-EMACS_DIR="${DIR}/../emacs-config"
+install_rustup() {
+    if ! hash rustc 2> /dev/null; then
+        curl -sSf https://sh.rustup.rs > /tmp/rustup_install
+        source /tmp/rustup_install
+    fi
+}
 
-if [[ ! -d "${EMACS_DIR}" ]]; then
-  echo "- cloning"
-  git clone git@github.com:angelini/emacs-config.git "${EMACS_DIR}" > /dev/null
-  echo "- linking"
-  ln -s "${EMACS_DIR}" "${HOME}/.emacs.d"
-fi
-
-echo "= bash-git-prompt"
-
-if [[ ! -d "./bash-git-prompt" ]]; then
-  echo "- cloning"
-  git clone -q https://github.com/magicmonty/bash-git-prompt.git
-  link "bash-git-prompt"
-fi
-
-echo "= git-bash-completion"
-
-if [[ ! -f "./git-completion.bash" ]]; then
-  echo "- downloading"
-  curl -O -s https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
-  link "git-completion.bash"
-fi
-
-echo "= python"
-install_pip
-pip_install "virtualenv"
-pip_install "virtualenvwrapper"
+echo "= updating"
+${UPDATE} 1> /dev/null
 
 echo "= dotfiles"
-rm "${HOME}/.profile" &> /dev/null
-link "profile"
+link "bashrc"
+source "${HOME}/.bashrc"
 link "agignore"
 link "flake8rc"
-link "jshintrc"
-link "profile.boot"
-
 link "gitconfig"
 link "gitignore_global"
-
 link "tmux.conf"
 link "tmux-osx.conf"
 link "tmux-linux.conf"
 
-echo "= installer"
-update
-install "rbenv"
-install "ruby-build"
-install "bash-completion"
+echo "= base"
 install "tree"
+install "bash-completion"
+install "emacs"
+install "the_silver_searcher"
+install_bash_git_prompt
 
-if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-  install "emacs24-nox"
-  install "silversearcher-ag"
-elif [[ "${OSTYPE}" == "darwin"* ]]; then
-  install "emacs"
-  install "the_silver_searcher"
-  install "reattach-to-user-namespace"
-fi
+echo "= ruby"
+install "rbenv" 1
+install "ruby-build" 1
+
+echo "= python"
+install_pyenv
+
+echo "= rust"
+install_rustup
+
+# echo "= emacs-config"
+# EMACS_DIR="${DIR}/../emacs-config"
+
+# if [[ ! -d "${EMACS_DIR}" ]]; then
+#   echo "- cloning"
+#   git clone -q git@github.com:angelini/emacs-config.git "${EMACS_DIR}" > /dev/null
+#   echo "- linking"
+#   ln -s "${EMACS_DIR}" "${HOME}/.emacs.d"
+# fi
