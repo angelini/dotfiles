@@ -1,0 +1,34 @@
+general {
+        colors = true
+        interval = 1
+}
+
+order += "ipv6"
+order += "disk /"
+order += "run_watch DHCP"
+order += "ethernet enp14s0"
+order += "load"
+order += "tztime local"
+
+disk "/" {
+        format = "%free"
+}
+
+run_watch DHCP {
+        pidfile = "/var/run/dhcpcd-enp14s0.pid"
+}
+
+ethernet enp14s0 {
+        # if you use %speed, i3status requires the cap_net_admin capability
+        format_up = "E: %ip (%speed)"
+        format_down = "E: down"
+}
+
+load {
+        format = "%5min"
+}
+
+tztime local {
+        format = "%Y-%m-%d %H:%M:%S"
+}
+

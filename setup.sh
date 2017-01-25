@@ -4,17 +4,17 @@ echo "* angelini/dotfiles"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [[ "${DEV}" ]]; then
-    echo "= DEV"
+    echo "* DEV"
     HOME="${DIR}/dev"
 fi
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-    echo "= linux"
+    echo "* linux"
     UPDATE="sudo yaourt -Syu --noconfirm"
     INSTALL="sudo yaourt -Sy --noconfirm"
     CHECK="yaourt -Qs"
 elif [[ "${OSTYPE}" == "darwin"* ]]; then
-    echo "= osx"
+    echo "* osx"
     UPDATE="brew update"
     INSTALL="brew install"
     CHECK="brew ls --versions"
@@ -26,9 +26,17 @@ fi
 
 link () {
     local target="${HOME}/.${1}"
-    if [[ ! -f "${target}" ]]; then
+    if [[ ! -e "${target}" ]]; then
         echo "- linking ${target}"
         ln -s "${DIR}/${1}" "${target}"
+    fi
+}
+
+link_config() {
+    local target="${HOME}/.config/${1}"
+    if [[ ! -e "${target}" ]]; then
+        echo "- linking ${target}"
+        ln -s "${DIR}/arch/${1}" "${target}"
     fi
 }
 
@@ -57,14 +65,14 @@ install_bash_git_prompt() {
     if [[ ! -d "./bash-git-prompt" ]]; then
         echo "- installing bash-git-prompt"
         git clone -q https://github.com/magicmonty/bash-git-prompt.git
-        link "bash-git-prompt"
     fi
+    link "bash-git-prompt"
 
     if [[ ! -f "./git-completion.bash" ]]; then
         echo "- installing git-bash-completion"
         curl -O -sSf https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
-        link "git-completion.bash"
     fi
+    link "git-completion.bash"
 }
 
 install_rustup() {
@@ -75,7 +83,7 @@ install_rustup() {
 }
 
 echo "= updating"
-${UPDATE} 1> /dev/null
+${UPDATE}
 
 echo "= dotfiles"
 link "bashrc"
@@ -104,6 +112,15 @@ install_pyenv
 
 echo "= rust"
 install_rustup
+
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+    echo "= arch configs"
+    link_config "dunst"
+    link_config "fontconfig"
+    link_config "i3"
+    link_config "i3status"
+    link_config "termite"
+fi
 
 # echo "= emacs-config"
 # EMACS_DIR="${DIR}/../emacs-config"
