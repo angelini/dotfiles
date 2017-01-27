@@ -25,19 +25,16 @@ elif [[ "${OSTYPE}" == "darwin"* ]]; then
 fi
 
 link () {
-    local target="${HOME}/.${1}"
-    if [[ ! -e "${target}" ]]; then
-        echo "- linking ${target}"
-        ln -s "${DIR}/${1}" "${target}"
+    local target="${DIR}/${1}"
+    local link="${HOME}/.${2:-$1}"
+    if [[ ! -e "${link}" ]]; then
+        echo "- linking ${target} to ${link}"
+        ln -s "${target}" "${link}"
     fi
 }
 
 link_config() {
-    local target="${HOME}/.config/${1}"
-    if [[ ! -e "${target}" ]]; then
-        echo "- linking ${target}"
-        ln -s "${DIR}/arch/${1}" "${target}"
-    fi
+    link "arch/${1}" "config/${1}"
 }
 
 install() {
@@ -122,12 +119,12 @@ if [[ "${OSTYPE}" == "linux-gnu" ]]; then
     link_config "termite"
 fi
 
-# echo "= emacs-config"
-# EMACS_DIR="${DIR}/../emacs-config"
+echo "= emacs-config"
+EMACS_DIR="${DIR}/../emacs-config"
 
-# if [[ ! -d "${EMACS_DIR}" ]]; then
-#   echo "- cloning"
-#   git clone -q git@github.com:angelini/emacs-config.git "${EMACS_DIR}" > /dev/null
-#   echo "- linking"
-#   ln -s "${EMACS_DIR}" "${HOME}/.emacs.d"
-# fi
+if [[ ! -d "${EMACS_DIR}" ]]; then
+  echo "- cloning"
+  git clone -q git@github.com:angelini/emacs-config.git "${EMACS_DIR}" > /dev/null
+  ln -s "${EMACS_DIR}" "${HOME}/.emacs.d"
+fi
+link "../emacs-config" "emacs.d"
