@@ -31,6 +31,15 @@ fi
 export PYENV_ROOT="${HOME}/.pyenv"
 export PATH="${PYENV_ROOT}/bin:${PATH}"
 
+if which pyenv > /dev/null; then
+   eval "$(pyenv init -)";
+   eval "$(pyenv virtualenv-init -)"
+fi
+
+# Rust
+export RUST_SRC_PATH="${HOME}/src/rustc-1.5.0/src"
+export PATH="${PATH}:${HOME}/.cargo/bin"
+
 # Golang
 export GOROOT="${HOME}/packages/go"
 export GOPATH="${HOME}/go"
@@ -48,7 +57,13 @@ export LEIN_JVM_OPTS=-XX:TieredStopAtLevel=1  # Causes a performance degradation
 # Shopify
 export IM_ALREADY_PRO_THANKS=true
 export NO_AUTOAUTOLINT=true
-export HADOOP_CONF_DIR="${HOME}/src/starscream/.cache/spark/current/conf/conf.cloudera.yarn"
+
+# Hadoop
+if [[ "${OSTYPE}" == "darwin"* ]]; then
+  export HADOOP_CONF_DIR="${HOME}/src/starscream/.cache/spark/current/conf/conf.cloudera.yarn"
+  export HADOOP_HOME="/usr/local/Cellar/hadoop/2.7.1"
+  export HIVE_HOME="/usr/local/Cellar/hive/1.2.1/libexec"
+fi
 
 # Prompt
 GIT_PROMPT_DIR="${HOME}/.bash-git-prompt"
@@ -70,3 +85,12 @@ fi
 if [[ -f "${BASH_COMPLETION_FILE}" ]]; then
   source "${BASH_COMPLETION_FILE}"
 fi
+
+export NVM_DIR="/Users/alexangelini/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Google cloud SDK
+source "${HOME}/google-cloud-sdk/path.bash.inc"
+source "${HOME}/google-cloud-sdk/completion.bash.inc"
