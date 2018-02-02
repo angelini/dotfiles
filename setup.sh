@@ -79,6 +79,12 @@ install_rustup() {
     fi
 }
 
+install_cask() {
+    if ! hash cask 2> /dev/null; then
+        curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
+    fi
+}
+
 echo "= updating"
 ${UPDATE}
 
@@ -109,6 +115,9 @@ install_pyenv
 
 echo "= rust"
 install_rustup
+
+echo "= cask"
+install_cask
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
     echo "= arch configs"

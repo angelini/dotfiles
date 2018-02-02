@@ -3,32 +3,52 @@ general {
         interval = 1
 }
 
-order += "ipv6"
-order += "disk /"
-order += "run_watch DHCP"
-order += "ethernet enp14s0"
 order += "load"
+order += "cpu_usage"
+order += "cpu_temperature 0"
+order += "disk /"
+order += "disk /home"
+order += "run_watch DHCP"
+order += "wireless wlp4s0"
 order += "tztime local"
 
+load {
+        format = " %1min "
+}
+
+cpu_usage {
+        format = " %usage "
+        degraded_threshold = 40
+}
+
+cpu_temperature 0 {
+        format = " T: %degrees °C "
+        path = "/sys/devices/platform/coretemp.0/hwmon/hwmon1/temp1_input"
+}
+
 disk "/" {
-        format = "%free"
+        format = " /: %free "
+}
+
+disk "/home" {
+        format = " /home: %free "
 }
 
 run_watch DHCP {
-        pidfile = "/var/run/dhcpcd-enp14s0.pid"
+        format = " %title: %status "
+        pidfile = "/var/run/dhcpcd-wlp4s0.pid"
 }
 
-ethernet enp14s0 {
-        # if you use %speed, i3status requires the cap_net_admin capability
-        format_up = "E: %ip (%speed)"
-        format_down = "E: down"
+ethernet enp3s0 {
+        format_up = " E: %ip (%speed) "
+        format_down = " E: down "
 }
 
-load {
-        format = "%5min"
+wireless wlp4s0 {
+        format_up = " W: %ip "
+        format_down = " W: down "
 }
 
 tztime local {
-        format = "%Y-%m-%d %H:%M:%S"
+        format = " %Y-%m-%d %H:%M:%S "
 }
-

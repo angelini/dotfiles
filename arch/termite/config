@@ -4,7 +4,7 @@ visible_bell = false
 scrollback_lines = 5000
 clickable_url = true
 allow_bold = true
-font = Source Code Pro 11
+font = Source Code Pro 16
 
 [colors]
 # special

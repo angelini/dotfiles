@@ -2,16 +2,12 @@
 alias l="ls --color -hlAG"
 alias gs="git status"
 alias gc="git checkout"
+alias gn="git commit --amend --no-edit"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
 alias cs="cd ~/src/starscream"
-alias knife="BUNDLE_GEMFILE=/Users/alexangelini/.chef/Gemfile bundle exec knife"
 
 export PATH="${HOME}/bin:/usr/local/bin:${PATH}"
 export EDITOR=emacs
-
-if [[ "${OSTYPE}" == "darwin"* ]]; then
-  export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:${PATH}"
-fi
 
 # Bash history
 export HISTCONTROL=ignoredups:erasedups
@@ -21,9 +17,12 @@ export HISTFILESIZE=1000000
 shopt -s histappend
 export PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
 
+# Emacs
+export PATH="${HOME}/.cask/bin:${PATH}"
+
 # Ruby
-export PATH="${HOME}/.rbenv/bin:${PATH}"
 if hash rbenv 2> /dev/null; then
+  export PATH="${HOME}/.rbenv/bin:${PATH}"
   eval "$(rbenv init -)"
 fi
 
@@ -37,7 +36,6 @@ if which pyenv > /dev/null; then
 fi
 
 # Rust
-export RUST_SRC_PATH="${HOME}/src/rustc-1.5.0/src"
 export PATH="${PATH}:${HOME}/.cargo/bin"
 
 # Golang
@@ -47,12 +45,15 @@ export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
 
 # Java
 if [[ "${OSTYPE}" == "darwin"* ]]; then
-  export JAVA_HOME=`/usr/libexec/java_home -v 1.8.0_31`
+  export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
 fi
 
 # Clojure
 export LEIN_FAST_TRAMPOLINE=true
 export LEIN_JVM_OPTS=-XX:TieredStopAtLevel=1  # Causes a performance degradation for long running processes
+
+# Rust
+export PATH="${HOME}/.cargo/bin:${PATH}"
 
 # Shopify
 export IM_ALREADY_PRO_THANKS=true
@@ -63,6 +64,11 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
   export HADOOP_CONF_DIR="${HOME}/src/starscream/.cache/spark/current/conf/conf.cloudera.yarn"
   export HADOOP_HOME="/usr/local/Cellar/hadoop/2.7.1"
   export HIVE_HOME="/usr/local/Cellar/hive/1.2.1/libexec"
+fi
+
+# Postgres
+if [[ "${OSTYPE}" == "darwin"* ]]; then
+  export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:${PATH}"
 fi
 
 # Prompt
@@ -86,11 +92,8 @@ if [[ -f "${BASH_COMPLETION_FILE}" ]]; then
   source "${BASH_COMPLETION_FILE}"
 fi
 
-export NVM_DIR="/Users/alexangelini/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-
-export PATH="$HOME/.cargo/bin:$PATH"
-
 # Google cloud SDK
-source "${HOME}/google-cloud-sdk/path.bash.inc"
-source "${HOME}/google-cloud-sdk/completion.bash.inc"
+if [[ "${OSTYPE}" == "darwin"* ]]; then
+  source "${HOME}/google-cloud-sdk/path.bash.inc"
+  source "${HOME}/google-cloud-sdk/completion.bash.inc"
+fi
