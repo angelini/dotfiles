@@ -52,12 +52,9 @@ fi
 export LEIN_FAST_TRAMPOLINE=true
 export LEIN_JVM_OPTS=-XX:TieredStopAtLevel=1  # Causes a performance degradation for long running processes
 
-# Rust
-export PATH="${HOME}/.cargo/bin:${PATH}"
-
-# Shopify
-export IM_ALREADY_PRO_THANKS=true
-export NO_AUTOAUTOLINT=true
+# C++
+export CC="/usr/bin/clang"
+export CXX="/usr/bin/clang++"
 
 # Hadoop
 if [[ "${OSTYPE}" == "darwin"* ]]; then
