@@ -1,12 +1,13 @@
 # Aliases
-alias l="ls --color -hlAG"
+alias l="ls -hlAG"
 alias gs="git status"
 alias gc="git checkout"
-alias gn="git commit --amend --no-edit"
+alias ga="git commit --amend --no-edit"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
-alias cs="cd ~/src/starscream"
+alias cs="cd ~/src/github.com/Shopify/starscream"
+alias rgc="rg -C 30"
 
-export PATH="${HOME}/bin:/usr/local/bin:${PATH}"
+export PATH="${HOME}/bin:/usr/local/bin:/usr/local/sbin:${PATH}"
 export EDITOR=emacs
 
 # Bash history
@@ -56,11 +57,12 @@ export LEIN_JVM_OPTS=-XX:TieredStopAtLevel=1  # Causes a performance degradation
 export CC="/usr/bin/clang"
 export CXX="/usr/bin/clang++"
 
-# Hadoop
-if [[ "${OSTYPE}" == "darwin"* ]]; then
-  export HADOOP_CONF_DIR="${HOME}/src/starscream/.cache/spark/current/conf/conf.cloudera.yarn"
-  export HADOOP_HOME="/usr/local/Cellar/hadoop/2.7.1"
-  export HIVE_HOME="/usr/local/Cellar/hive/1.2.1/libexec"
+# Javascript
+export NVM_DIR="/Users/alexangelini/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+if [[ -f /opt/dev/dev.sh ]] && [[ $- == *i* ]]; then
+  source /opt/dev/dev.sh
 fi
 
 # Postgres
@@ -93,4 +95,9 @@ fi
 if [[ "${OSTYPE}" == "darwin"* ]]; then
   source "${HOME}/google-cloud-sdk/path.bash.inc"
   source "${HOME}/google-cloud-sdk/completion.bash.inc"
+fi
+
+# Postgres
+if [[ "${OSTYPE}" == "darwin"* ]]; then
+  export PATH="${PATH}:/Applications/Postgres.app/Contents/Versions/latest/bin"
 fi

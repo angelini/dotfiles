@@ -103,7 +103,8 @@ echo "= base"
 install "tree"
 install "bash-completion"
 install "emacs"
-install "the_silver_searcher"
+install "ripgrep"
+install "fd"
 install_bash_git_prompt
 
 echo "= ruby"
