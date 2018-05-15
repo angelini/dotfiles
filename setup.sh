@@ -121,6 +121,9 @@ echo "= cask"
 install_cask
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+    echo "= clang"
+    install "clang"
+
     echo "= arch configs"
     link_config "dunst"
     link_config "fontconfig"
