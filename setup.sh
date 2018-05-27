@@ -12,7 +12,7 @@ if [[ "${OSTYPE}" == "linux-gnu" ]]; then
     echo "* linux"
     UPDATE="sudo yaourt -Syu --noconfirm"
     INSTALL="sudo yaourt -Sy --noconfirm"
-    CHECK="yaourt -Qs"
+    CHECK="yaourt -Qi"
 elif [[ "${OSTYPE}" == "darwin"* ]]; then
     echo "* osx"
     UPDATE="brew update"
