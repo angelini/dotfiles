@@ -163,6 +163,11 @@ install "ruby-build"
 echo "= python"
 install_pyenv
 
+if [[ "$(pyenv global)" != "3.7.0" ]]; then
+    pyenv install 3.7.0
+    pyenv global 3.7.0
+fi
+
 echo "= rust"
 install_rustup
 
