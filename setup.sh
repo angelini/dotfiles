@@ -5,20 +5,48 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [[ "${DEV}" ]]; then
     echo "* DEV"
+    set -x
     HOME="${DIR}/dev"
 fi
 
+command_exists() {
+    hash "${1}" 2> /dev/null
+}
+
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
     echo "* linux"
-    UPDATE="sudo yaourt -Syu --noconfirm"
-    INSTALL="sudo yaourt -Sy --noconfirm"
-    CHECK="yaourt -Qi"
+    if command_exists "apt-get"; then
+	echo "* ubuntu"
+	DISTRO="ubuntu"
+	UPDATE="sudo apt-get update -y"
+	INSTALL="sudo apt-get install -y"
+	CHECK="dpkg -l"
+    fi
+    if command_exists "pacman"; then
+	DISTRO="arch"
+	UPDATE="sudo yaourt -Syu --noconfirm"
+	INSTALL="sudo yaourt -Sy --noconfirm"
+	CHECK="yaourt -Qi"
+	if ! command_exists "yaourt"; then
+	    sudo cat <<EOT >> /etc/pacman.conf
+[archlinuxfr]
+SigLevel = Never
+Server = http://repo.archlinux.fr/$arch
+EOT
+	    sudo pacman -Syu --noconfirm yaourt
+	fi
+    fi
+    if [[ -z "${UPDATE}" ]]; then
+	echo "unable to detect version of linux"
+	exit 1
+    fi
 elif [[ "${OSTYPE}" == "darwin"* ]]; then
     echo "* osx"
+    DISTRO="macos"
     UPDATE="brew update"
     INSTALL="brew install"
     CHECK="brew ls --versions"
-    if ! hash brew 2> /dev/null; then
+    if ! command_exists "brew"; then
         echo "- installing brew"
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 1> /dev/null
     fi
@@ -41,17 +69,13 @@ install() {
     local package="${1}"
     if ! ${CHECK} "${package}" &> /dev/null; then
         echo "- installing ${package}"
-        if [[ "${2}" ]]; then
-            yaourt -Sy --noconfirm "${package}" > /dev/null
-        else
-            ${INSTALL} "${package}" > /dev/null
-        fi
+        ${INSTALL} "${package}" > /dev/null
     fi
 }
 
 install_pyenv() {
     local pyenv_dir="${HOME}/.pyenv"
-    if ! hash pyenv 2> /dev/null; then
+    if ! command_exists "pyenv"; then
         echo "- installing pyenv"
         git clone -q https://github.com/yyuu/pyenv.git "${pyenv_dir}"
         git clone -q https://github.com/yyuu/pyenv-virtualenv.git "${pyenv_dir}/plugins/pyenv-virtualenv"
@@ -67,26 +91,50 @@ install_bash_git_prompt() {
 
     if [[ ! -f "./git-completion.bash" ]]; then
         echo "- installing git-bash-completion"
-        curl -O -sSf https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+        curl -O -fsSL https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
     fi
     link "git-completion.bash"
 }
 
 install_rustup() {
-    if ! hash rustc 2> /dev/null; then
-        curl -sSf https://sh.rustup.rs > /tmp/rustup_install
+    if ! command_exists "rustc"; then
+        curl -fsSL https://sh.rustup.rs > /tmp/rustup_install
         source /tmp/rustup_install
     fi
 }
 
 install_cask() {
-    if ! hash cask 2> /dev/null; then
+    if ! command_exists "cask"; then
         curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
     fi
 }
 
 echo "= updating"
 ${UPDATE}
+mkdir -p "${HOME}/bin"
+
+if [[ "${DISTRO}" == "ubuntu" ]]; then
+    echo "= ubuntu specific"
+    rm "${HOME}/.bashrc"
+    install "curl"
+    if ! command_exists "rg"; then
+	curl -O -fsSL https://github.com/BurntSushi/ripgrep/releases/download/0.10.0/ripgrep_0.10.0_amd64.deb
+	${INSTALL} ./ripgrep_0.10.0_amd64.deb
+    fi
+    if ! command_exists "fd"; then
+	curl -O -fsSL https://github.com/sharkdp/fd/releases/download/v7.1.0/fd-musl_7.1.0_amd64.deb
+	${INSTALL} ./fd-musl_7.1.0_amd64.deb
+    fi
+fi
+
+if [[ "${DISTRO}" == "arch" ]]; then
+    echo "= arch specific"
+    link_config "dunst"
+    link_config "fontconfig"
+    link_config "i3"
+    link_config "i3status"
+    link_config "termite"
+fi
 
 echo "= dotfiles"
 link "bashrc"
@@ -100,6 +148,7 @@ link "tmux-osx.conf"
 link "tmux-linux.conf"
 
 echo "= base"
+install "curl"
 install "tree"
 install "bash-completion"
 install "emacs"
@@ -108,8 +157,8 @@ install "fd"
 install_bash_git_prompt
 
 echo "= ruby"
-install "rbenv" 1
-install "ruby-build" 1
+install "rbenv"
+install "ruby-build"
 
 echo "= python"
 install_pyenv
@@ -117,19 +166,9 @@ install_pyenv
 echo "= rust"
 install_rustup
 
-echo "= cask"
-install_cask
-
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
     echo "= clang"
     install "clang"
-
-    echo "= arch configs"
-    link_config "dunst"
-    link_config "fontconfig"
-    link_config "i3"
-    link_config "i3status"
-    link_config "termite"
 fi
 
 echo "= emacs-config"
@@ -141,3 +180,9 @@ if [[ ! -d "${EMACS_DIR}" ]]; then
   ln -s "${EMACS_DIR}" "${HOME}/.emacs.d"
 fi
 link "../emacs-config" "emacs.d"
+
+echo "= cask"
+install_cask
+cd "${EMACS_DIR}"
+cask
+cd "${DIR}"
