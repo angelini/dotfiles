@@ -40,8 +40,8 @@ fi
 export PATH="${PATH}:${HOME}/.cargo/bin"
 
 # Golang
-export GOROOT="${HOME}/packages/go"
-export GOPATH="${HOME}/go"
+export GOPATH="${HOME}"
+export GO111MODULE=on
 export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
 
 # Java
