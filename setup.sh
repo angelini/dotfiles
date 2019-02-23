@@ -100,7 +100,7 @@ install_bash_git_prompt() {
 install_rustup() {
   if ! command_exists "rustc"; then
     curl -fsSL https://sh.rustup.rs > /tmp/rustup_install
-    source /tmp/rustup_install
+    source /tmp/rustup_install -y
   fi
 }
 
