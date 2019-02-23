@@ -165,7 +165,7 @@ echo "= python"
 install_pyenv
 
 if [[ "$(pyenv global)" != "3.7.0" ]]; then
-  pyenv install 3.7.0
+  pyenv install 3.7.0 --skip-existing
   pyenv global 3.7.0
 fi
 
