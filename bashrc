@@ -101,3 +101,8 @@ fi
 if [[ "${OSTYPE}" == "darwin"* ]]; then
   export PATH="${PATH}:/Applications/Postgres.app/Contents/Versions/latest/bin"
 fi
+
+# WSL
+if grep -q "Microsoft" /proc/sys/kernel/osrelease; then
+  export DISPLAY=:0.0
+fi
