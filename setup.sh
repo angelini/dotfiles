@@ -104,6 +104,12 @@ install_rustup() {
   fi
 }
 
+install_nvm() {
+  if ! command_exists "nvm"; then
+    curl -fsSL https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+  fi
+}
+
 install_cask() {
   if ! command_exists "cask"; then
     curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
@@ -164,10 +170,13 @@ install "ruby-build"
 echo "= python"
 install_pyenv
 
-if [[ "$(pyenv global)" != "3.7.0" ]]; then
-  pyenv install 3.7.0 --skip-existing
-  pyenv global 3.7.0
+if [[ "$(pyenv global)" != "3.7.2" ]]; then
+  pyenv install 3.7.2 --skip-existing
+  pyenv global 3.7.2
 fi
+
+echo "= node"
+install_nvm
 
 echo "= rust"
 install_rustup

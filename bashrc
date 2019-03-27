@@ -46,7 +46,7 @@ export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
 
 # Java
 if [[ "${OSTYPE}" == "darwin"* ]]; then
-  export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+  export JAVA_HOME=`/usr/libexec/java_home -v 12`
 fi
 
 # Clojure
@@ -58,16 +58,18 @@ export CC="/usr/bin/clang"
 export CXX="/usr/bin/clang++"
 
 # Javascript
-export NVM_DIR="/Users/alexangelini/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
-if [[ -f /opt/dev/dev.sh ]] && [[ $- == *i* ]]; then
-  source /opt/dev/dev.sh
-fi
+export NVM_DIR="${HOME}/.nvm"
+[[ -s "${NVM_DIR}/nvm.sh" ]] && . "${NVM_DIR}/nvm.sh"
+[[ -s "${NVM_DIR}/bash_completion" ]] && . "${NVM_DIR}/bash_completion"
 
 # Postgres
 if [[ "${OSTYPE}" == "darwin"* ]]; then
   export PATH="/Applications/Postgres.app/Contents/Versions/9.3/bin:${PATH}"
+fi
+
+# MongoDB
+if [[ "${OSTYPE}" == "darwin"* ]]; then
+  export PATH="/usr/local/opt/mongodb-community@3.6/bin:${PATH}"
 fi
 
 # Prompt
@@ -103,6 +105,11 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
 fi
 
 # WSL
-if grep -q "Microsoft" /proc/sys/kernel/osrelease; then
+if [[ "${OSTYPE}" == "linux-gnu" ]] && grep -q "Microsoft" /proc/sys/kernel/osrelease; then
   export DISPLAY=:0.0
 fi
+
+# ulimit
+# For MacOS: https://gist.github.com/tombigel/d503800a282fcadbee14b537735d202c
+ulimit -n 200000
+ulimit -u 2048
