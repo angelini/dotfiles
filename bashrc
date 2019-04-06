@@ -4,8 +4,11 @@ alias gs="git status"
 alias gc="git checkout"
 alias ga="git commit --amend --no-edit"
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
-alias cs="cd ~/src/github.com/Shopify/starscream"
 alias rgc="rg -C 30"
+
+if [[ -f "${HOME}/.aliases" ]]; then
+  . "${HOME}/.aliases"
+fi
 
 export PATH="${HOME}/bin:/usr/local/bin:/usr/local/sbin:${PATH}"
 export EDITOR=emacs
@@ -108,8 +111,3 @@ fi
 if [[ "${OSTYPE}" == "linux-gnu" ]] && grep -q "Microsoft" /proc/sys/kernel/osrelease; then
   export DISPLAY=:0.0
 fi
-
-# ulimit
-# For MacOS: https://gist.github.com/tombigel/d503800a282fcadbee14b537735d202c
-ulimit -n 200000
-ulimit -u 2048

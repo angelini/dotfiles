@@ -1,2 +1,3 @@
 [flake8]
 ignore = E501,E241,W690,W293,D001
+builtins = breakpoint
