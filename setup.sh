@@ -123,6 +123,7 @@ mkdir -p "${HOME}/bin"
 if [[ "${DISTRO}" == "ubuntu" ]]; then
   echo "= ubuntu specific"
   rm "${HOME}/.bashrc"
+  install "apt-utils"
   install "curl"
   if ! command_exists "rg"; then
 	curl -O -fsSL https://github.com/BurntSushi/ripgrep/releases/download/0.10.0/ripgrep_0.10.0_amd64.deb
@@ -163,6 +164,11 @@ install "ripgrep"
 install "fd"
 install_bash_git_prompt
 
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+  echo "= clang"
+  install "clang"
+fi
+
 echo "= ruby"
 install "rbenv"
 install "ruby-build"
@@ -180,11 +186,6 @@ install_nvm
 
 echo "= rust"
 install_rustup
-
-if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-  echo "= clang"
-  install "clang"
-fi
 
 echo "= emacs-config"
 EMACS_DIR="${DIR}/../emacs-config"
