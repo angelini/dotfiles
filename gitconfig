@@ -7,13 +7,13 @@
     ui = true
 [core]
     editor = emacs
-    excludesfile = /Users/alexangelini/.gitignore_global
+    excludesfile = /Users/angelini/.gitignore_global
 [hub]
     protocol = https
 [filter "media"]
     clean = git-media-clean %f
     smudge = git-media-smudge %f
 [diff]
-	algorithm = patience
+    algorithm = patience
 [url "git@github.com:"]
-	insteadOf = https://github.com/
+    insteadOf = https://github.com/

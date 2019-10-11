@@ -3,6 +3,8 @@ alias l="ls -hlAG"
 alias gs="git status"
 alias gc="git checkout"
 alias ga="git commit --amend --no-edit"
+alias gpo='git push origin $(git rev-parse --abbrev-ref HEAD)'
+alias gpfo='git push origin +$(git rev-parse --abbrev-ref HEAD)'
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
 alias rgc="rg -C 30"
 
@@ -33,10 +35,11 @@ fi
 # Python
 export PYENV_ROOT="${HOME}/.pyenv"
 export PATH="${PYENV_ROOT}/bin:${PATH}"
+export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 
 if which pyenv > /dev/null; then
   eval "$(pyenv init -)";
-  eval "$(pyenv virtualenv-init -)"
+  # eval "$(pyenv virtualenv-init -)"
 fi
 
 # Rust
@@ -72,7 +75,7 @@ fi
 
 # MongoDB
 if [[ "${OSTYPE}" == "darwin"* ]]; then
-  export PATH="/usr/local/opt/mongodb-community@3.6/bin:${PATH}"
+  export PATH="/usr/local/opt/mongodb-community/bin:${PATH}"
 fi
 
 # Prompt
@@ -111,3 +114,6 @@ fi
 if [[ "${OSTYPE}" == "linux-gnu" ]] && grep -q "Microsoft" /proc/sys/kernel/osrelease; then
   export DISPLAY=:0.0
 fi
+
+# Backport Terraform
+export PATH="/usr/local/opt/terraform@0.11/bin:$PATH"
