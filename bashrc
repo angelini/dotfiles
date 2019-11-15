@@ -115,5 +115,6 @@ if [[ "${OSTYPE}" == "linux-gnu" ]] && grep -q "Microsoft" /proc/sys/kernel/osre
   export DISPLAY=:0.0
 fi
 
-# Backport Terraform
-export PATH="/usr/local/opt/terraform@0.11/bin:$PATH"
+# Homebrew
+export HOMEBREW_NO_ANALYTICS=1
+
