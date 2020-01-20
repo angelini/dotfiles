@@ -5,7 +5,7 @@ alias gc="git checkout"
 alias ga="git commit --amend --no-edit"
 alias gpo='git push origin $(git rev-parse --abbrev-ref HEAD)'
 alias gpfo='git push origin +$(git rev-parse --abbrev-ref HEAD)'
-alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative"
+alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative --max-count=15"
 alias rgc="rg -C 30"
 
 if [[ -f "${HOME}/.aliases" ]]; then
@@ -117,4 +117,3 @@ fi
 
 # Homebrew
 export HOMEBREW_NO_ANALYTICS=1
-
