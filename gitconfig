@@ -8,6 +8,7 @@
 [core]
     editor = emacs
     excludesfile = /Users/angelini/.gitignore_global
+    compression = 0
 [hub]
     protocol = https
 [filter "media"]

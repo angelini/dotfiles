@@ -7,10 +7,14 @@ alias gpo='git push origin $(git rev-parse --abbrev-ref HEAD)'
 alias gpfo='git push origin +$(git rev-parse --abbrev-ref HEAD)'
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative --max-count=15"
 alias rgc="rg -C 30"
+alias epoch='python -c "import time; print(time.strftime(\"%Y-%m-%d %H:%M:%S\", time.localtime($@)))"'
 
 if [[ -f "${HOME}/.aliases" ]]; then
   . "${HOME}/.aliases"
 fi
+
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 export PATH="${HOME}/bin:/usr/local/bin:/usr/local/sbin:${PATH}"
 export EDITOR=emacs
@@ -52,7 +56,7 @@ export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
 
 # Java
 if [[ "${OSTYPE}" == "darwin"* ]]; then
-  export JAVA_HOME=`/usr/libexec/java_home -v 12`
+  export JAVA_HOME=`/usr/libexec/java_home -v 13`
 fi
 
 # Clojure
@@ -100,9 +104,10 @@ if [[ -f "${BASH_COMPLETION_FILE}" ]]; then
 fi
 
 # Google cloud SDK
-if [[ "${OSTYPE}" == "darwin"* ]]; then
-  source "${HOME}/google-cloud-sdk/path.bash.inc"
-  source "${HOME}/google-cloud-sdk/completion.bash.inc"
+GCP_SDK_DIR="${HOME}/google-cloud-sdk"
+if [[ -d "${GCP_SDK_DIR}" ]]; then
+  source "${GCP_SDK_DIR}/path.bash.inc"
+  source "${GCP_SDK_DIR}/completion.bash.inc"
 fi
 
 # Postgres
@@ -117,3 +122,9 @@ fi
 
 # Homebrew
 export HOMEBREW_NO_ANALYTICS=1
+
+# K8S
+KUBE_CONFIG_DIR="${HOME}/.kube"
+if [[ -d "${KUBE_CONFIG_DIR}" ]]; then
+  export KUBECONFIG="${KUBE_CONFIG_DIR}/config:${KUBE_CONFIG_DIR}/eksconfig"
+fi
