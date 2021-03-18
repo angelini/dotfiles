@@ -47,7 +47,10 @@ if which pyenv > /dev/null; then
 fi
 
 # Rust
-export PATH="${PATH}:${HOME}/.cargo/bin"
+if [[ -d "${HOME}/.cargo" ]]; then
+  export PATH="${PATH}:${HOME}/.cargo/bin"
+  source "$HOME/.cargo/env"
+fi
 
 # Golang
 export GOPATH="${HOME}"
@@ -85,11 +88,12 @@ fi
 # Prompt
 GIT_PROMPT_DIR="${HOME}/.bash-git-prompt"
 if [[ -d "${GIT_PROMPT_DIR}" ]]; then
+  GIT_PROMPT_START="\[\033[0;32m\]\h\[\033[0;0m\] \[\033[0;33m\]\w\[\033[0;0m\]"
   source "${GIT_PROMPT_DIR}/gitprompt.sh"
 fi
 
 # Bash completions
-if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   BASH_COMPLETION_FILE="/usr/share/bash-completion/bash_completion"
 elif [[ "${OSTYPE}" == "darwin"* ]]; then
   BASH_COMPLETION_FILE="/usr/local/etc/bash_completion"
@@ -116,7 +120,7 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
 fi
 
 # WSL
-if [[ "${OSTYPE}" == "linux-gnu" ]] && grep -q "Microsoft" /proc/sys/kernel/osrelease; then
+if [[ "${OSTYPE}" == "linux-gnu"* ]] && grep -q "Microsoft" /proc/sys/kernel/osrelease; then
   export DISPLAY=:0.0
 fi
 

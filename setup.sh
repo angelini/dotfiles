@@ -13,7 +13,7 @@ command_exists() {
   hash "${1}" 2> /dev/null
 }
 
-if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   echo "= linux"
   if command_exists "apt-get"; then
 	echo "- ubuntu"
@@ -58,6 +58,15 @@ link () {
   local link="${HOME}/.${2:-$1}"
   if [[ ! -e "${link}" ]]; then
     echo "- linking ${target} to ${link}"
+    ln -s "${target}" "${link}"
+  fi
+}
+
+link_bin() {
+  local target="${1}"
+  local link="${HOME}/bin/${2}"
+  if [[ ! -e "${link}" ]]; then
+    echo "-linking ${target} to ${link}"
     ln -s "${target}" "${link}"
   fi
 }
@@ -125,14 +134,10 @@ if [[ "${DISTRO}" == "ubuntu" ]]; then
   rm "${HOME}/.bashrc"
   install "apt-utils"
   install "curl"
-  if ! command_exists "rg"; then
-	curl -O -fsSL https://github.com/BurntSushi/ripgrep/releases/download/0.10.0/ripgrep_0.10.0_amd64.deb
-	${INSTALL} ./ripgrep_0.10.0_amd64.deb
-  fi
-  if ! command_exists "fd"; then
-	curl -O -fsSL https://github.com/sharkdp/fd/releases/download/v7.1.0/fd-musl_7.1.0_amd64.deb
-	${INSTALL} ./fd-musl_7.1.0_amd64.deb
-  fi
+  install "fd-find"
+  link_bin $(which fdfind) "fd"
+else
+  install "fd"
 fi
 
 if [[ "${DISTRO}" == "arch" ]]; then
@@ -161,10 +166,9 @@ install "tree"
 install "bash-completion"
 install "emacs"
 install "ripgrep"
-install "fd"
 install_bash_git_prompt
 
-if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   echo "= clang"
   install "clang"
 fi
@@ -176,9 +180,9 @@ install "ruby-build"
 echo "= python"
 install_pyenv
 
-if [[ "$(pyenv global)" != "3.7.2" ]]; then
-  pyenv install 3.7.2 --skip-existing
-  pyenv global 3.7.2
+if [[ "$(pyenv global)" != "3.9.2" ]]; then
+  pyenv install 3.9.2 --skip-existing
+  pyenv global 3.9.2
 fi
 
 echo "= node"
