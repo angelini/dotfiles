@@ -16,7 +16,7 @@ fi
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-export PATH="${HOME}/bin:/usr/local/bin:/usr/local/sbin:${PATH}"
+export PATH="${HOME}/bin:${HOME}/.local/bin:/usr/local/bin:/usr/local/sbin:${PATH}"
 export EDITOR=emacs
 
 # Bash history
@@ -74,6 +74,9 @@ export CXX="/usr/bin/clang++"
 export NVM_DIR="${HOME}/.nvm"
 [[ -s "${NVM_DIR}/nvm.sh" ]] && . "${NVM_DIR}/nvm.sh"
 [[ -s "${NVM_DIR}/bash_completion" ]] && . "${NVM_DIR}/bash_completion"
+
+# Lua
+export PATH="${HOME}/.luarocks/bin:${PATH}"
 
 # Postgres
 if [[ "${OSTYPE}" == "darwin"* ]]; then

@@ -16,26 +16,33 @@ command_exists() {
 if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   echo "= linux"
   if command_exists "apt-get"; then
-	echo "- ubuntu"
-	DISTRO="ubuntu"
-	UPDATE="sudo apt-get update -y"
-	INSTALL="sudo apt-get install -y"
-	CHECK="dpkg -l"
+    echo "- ubuntu"
+    DISTRO="ubuntu"
+    UPDATE="sudo apt-get update -y"
+    INSTALL="sudo apt-get install -y"
+    CHECK="dpkg -l"
   fi
   if command_exists "pacman"; then
     echo "- arch"
-	DISTRO="arch"
-	UPDATE="sudo yaourt -Syu --noconfirm"
-	INSTALL="sudo yaourt -Sy --noconfirm"
-	CHECK="yaourt -Qi"
-	if ! command_exists "yaourt"; then
-	  sudo cat <<EOT >> /etc/pacman.conf
+    DISTRO="arch"
+    UPDATE="sudo yaourt -Syu --noconfirm"
+    INSTALL="sudo yaourt -Sy --noconfirm"
+    CHECK="yaourt -Qi"
+    if ! command_exists "yaourt"; then
+      sudo cat <<EOT >> /etc/pacman.conf
 [archlinuxfr]
 SigLevel = Never
 Server = http://repo.archlinux.fr/$arch
 EOT
-	  sudo pacman -Syu --noconfirm yaourt
-	fi
+      sudo pacman -Syu --noconfirm yaourt
+    fi
+  fi
+  if command_exists "dnf"; then
+    echo "-fedora"
+    DISTRO="fedora"
+    UPDATE="sudo dnf update -y"
+    INSTALL="sudo dnf install -y"
+    CHECK="dnf list installed"
   fi
   if [[ -z "${UPDATE}" ]]; then
 	echo "unable to detect version of linux"
@@ -115,7 +122,7 @@ install_rustup() {
 
 install_nvm() {
   if ! command_exists "nvm"; then
-    curl -fsSL https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
   fi
 }
 
@@ -134,10 +141,6 @@ if [[ "${DISTRO}" == "ubuntu" ]]; then
   rm "${HOME}/.bashrc"
   install "apt-utils"
   install "curl"
-  install "fd-find"
-  link_bin $(which fdfind) "fd"
-else
-  install "fd"
 fi
 
 if [[ "${DISTRO}" == "arch" ]]; then
@@ -149,11 +152,23 @@ if [[ "${DISTRO}" == "arch" ]]; then
   link_config "termite"
 fi
 
+if [[ "${DISTRO}" == "fedora" ]]; then
+  echo "= fedora specific"
+  rm "${HOME}/.bashrc"
+  install "libffi-devel"
+  install "zlib-devel"
+  install "bzip2-devel"
+  install "sqlite-devel"
+  install "openssl-devel"
+  install "xz-devel"
+  install "findutils"
+fi
+
 echo "= dotfiles"
 link "bashrc"
 source "${HOME}/.bashrc"
 link "agignore"
-link "flake8rc"
+link "flake8"
 link "gitconfig"
 link "gitignore_global"
 link "tmux.conf"
@@ -166,6 +181,14 @@ install "tree"
 install "bash-completion"
 install "emacs"
 install "ripgrep"
+
+if [[ "${DISTRO}" == "fedora" || "${DISTRO}" == "ubuntu" ]]; then
+  install "fd-find"
+  [[ "${DISTRO}" == "ubuntu" ]] && link_bin $(which fdfind) "fd"
+else
+  install "fd"
+fi
+
 install_bash_git_prompt
 
 if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
@@ -173,9 +196,11 @@ if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
   install "clang"
 fi
 
-echo "= ruby"
-install "rbenv"
-install "ruby-build"
+if [[ "${DISTRO}" != "fedora" ]]; then
+  echo "= ruby"
+  install "rbenv"
+  install "ruby-build"
+fi
 
 echo "= python"
 install_pyenv
