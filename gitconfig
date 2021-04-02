@@ -1,19 +1,22 @@
-[push]
-    default = current
 [user]
     name = Alex Angelini
     email = alex.louis.angelini@gmail.com
+
+[core]
+    editor = vim
+	excludesFile = $HOME/.gitignore_global
+
+[push]
+    default = current
+
 [color]
     ui = true
-[core]
-    editor = emacs
-	excludesfile = /home/alex/.gitignore_global
-[hub]
-    protocol = https
-[filter "media"]
-    clean = git-media-clean %f
-    smudge = git-media-smudge %f
+
 [diff]
     algorithm = patience
-[url "git@github.com:"]
+
+[init]
+    defaultBranch = main
+
+[url "ssh://git@github.com/"]
     insteadOf = https://github.com/

@@ -1,9 +1,0 @@
-temp
-tmp
-vendor
-dist
-node_modules
-bundle
-generated
-log
-*.min.js

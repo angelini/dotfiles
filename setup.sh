@@ -1,233 +1,451 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090
+# shellcheck disable=SC2155
 
-echo "* angelini/dotfiles"
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+set -euo pipefail
 
-if [[ "${DEV}" ]]; then
-  echo "* DEV"
-  set -x
-  HOME="${DIR}/dev"
-fi
+readonly GITHUB_USER="angelini"
 
-command_exists() {
-  hash "${1}" 2> /dev/null
+readonly CONFIG_DIR="${HOME}/.config"
+readonly BIN_DIR="${HOME}/bin"
+readonly CLOUD_DIR="${HOME}/cloud"
+readonly REPOS_DIR="${HOME}/repos"
+readonly DOTFILES_DIR="${REPOS_DIR}/dotfiles"
+
+readonly PYTHON_VERSION="3.9.2"
+readonly NVM_VERSION="0.37.2"
+
+log() {
+    echo "$(date +"%H:%M:%S") - $(printf '%s' "$@")" 1>&2
 }
 
-if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
-  echo "= linux"
-  if command_exists "apt-get"; then
-    echo "- ubuntu"
-    DISTRO="ubuntu"
-    UPDATE="sudo apt-get update -y"
-    INSTALL="sudo apt-get install -y"
-    CHECK="dpkg -l"
-  fi
-  if command_exists "pacman"; then
-    echo "- arch"
-    DISTRO="arch"
-    UPDATE="sudo yaourt -Syu --noconfirm"
-    INSTALL="sudo yaourt -Sy --noconfirm"
-    CHECK="yaourt -Qi"
-    if ! command_exists "yaourt"; then
-      sudo cat <<EOT >> /etc/pacman.conf
-[archlinuxfr]
-SigLevel = Never
-Server = http://repo.archlinux.fr/$arch
-EOT
-      sudo pacman -Syu --noconfirm yaourt
+error() {
+    local message="${1}"
+
+    echo "$(date +"%H:%M:%S") - ERROR: $(printf '%s' "${message}")" >&2
+    exit 55
+}
+
+not_implemented() {
+    error "not implemented"
+}
+
+ask() {
+    local question="${1}"
+
+    read -rp "=> ${question} [y/N] " response
+    case "${response}" in
+        [Yy]*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+bin_exists() {
+    type -t "${1}" &> /dev/null
+}
+
+detect_os() {
+    if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
+        echo "linux"
+    elif [[ "${OSTYPE}" == "darwin" ]]; then
+        echo "macos"
+    else
+        echo "unknown"
     fi
-  fi
-  if command_exists "dnf"; then
-    echo "-fedora"
-    DISTRO="fedora"
-    UPDATE="sudo dnf update -y"
-    INSTALL="sudo dnf install -y"
-    CHECK="dnf list installed"
-  fi
-  if [[ -z "${UPDATE}" ]]; then
-	echo "unable to detect version of linux"
-	exit 1
-  fi
-elif [[ "${OSTYPE}" == "darwin"* ]]; then
-  echo "= osx"
-  DISTRO="macos"
-  UPDATE="brew update"
-  INSTALL="brew install"
-  CHECK="brew ls --versions"
-  if ! command_exists "brew"; then
-    echo "- installing brew"
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 1> /dev/null
-  fi
-fi
-
-link () {
-  local target="${DIR}/${1}"
-  local link="${HOME}/.${2:-$1}"
-  if [[ ! -e "${link}" ]]; then
-    echo "- linking ${target} to ${link}"
-    ln -s "${target}" "${link}"
-  fi
 }
 
-link_bin() {
-  local target="${1}"
-  local link="${HOME}/bin/${2}"
-  if [[ ! -e "${link}" ]]; then
-    echo "-linking ${target} to ${link}"
-    ln -s "${target}" "${link}"
-  fi
+detect_distro() {
+    if bin_exists "apt-get"; then
+        echo "debian"
+    elif bin_exists "dnf"; then
+        echo "fedora"
+    else
+        error "unknown distro"
+    fi
 }
 
-link_config() {
-  link "arch/${1}" "config/${1}"
+update_package_manager() {
+    log "updating package manager"
+
+    case "$(detect_distro)" in
+        "debian")
+            sudo apt update -y > /dev/null
+            ;;
+        "fedora")
+            sudo dnf update -y > /dev/null
+            ;;
+        *)
+            not_implemented
+            ;;
+    esac
+}
+
+check() {
+    local package="${1}"
+
+    case "$(detect_distro)" in
+        "debian")
+            dkpg -l "${package}" &> /dev/null
+            ;;
+        "fedora")
+            dnf list installed "${package}" &> /dev/null
+            ;;
+        *)
+            not_implemented
+            ;;
+    esac
 }
 
 install() {
-  local package="${1}"
-  if ! ${CHECK} "${package}" &> /dev/null; then
-    echo "- installing ${package}"
-    ${INSTALL} "${package}" > /dev/null
-  fi
+    local package="${1}"
+
+    if ! check "${package}"; then
+        log "installing ${package}"
+
+        case "$(detect_distro)" in
+            "debian")
+                sudo apt install -y "${package}" > /dev/null
+                ;;
+            "fedora")
+                sudo dnf install -y "${package}" > /dev/null
+                ;;
+            *)
+                not_implemented
+                ;;
+        esac
+    fi
+}
+
+link() {
+    local target="${DOTFILES_DIR}/${1}"
+    local link="${HOME}/.${1}"
+    if [[ -n "${2:-}" ]]; then
+        link="${2}"
+    fi
+
+    if [[ ! -f "${link}" ]]; then
+        log "linking ${target} to ${link}"
+        ln -s "${target}" "${link}"
+    fi
+}
+
+update_hostname() {
+    log "current hostname is $(hostname)"
+
+    if ask "do you want to update the hostname?"; then
+        read -rp "new hostname: " new_hostname
+
+        log "updating hostname to ${new_hostname}"
+        sudo hostnamectl set-hostname "${new_hostname}"
+    fi
+}
+
+add_user_groups() {
+    log "adding $(whoami) to systemd-journal"
+    sudo usermod -a -G systemd-journal "$(whoami)"
+}
+
+setup_bin_dir() {
+    log "setting up bin directory"
+    mkdir -p "${BIN_DIR}"
+}
+
+setup_ssh_dir() {
+    log "setting up ssh directory"
+
+    local ssh_dir="${HOME}/.ssh"
+
+    mkdir -p "${ssh_dir}"
+    chmod 700 "${ssh_dir}"
+
+    if [[ ! -f "${ssh_dir}/id_ed25519" ]]; then
+        log "generating SSH keys"
+        ssh-keygen -t ed25519 -a 100 -q -N "" -f "${ssh_dir}/id_ed25519" -C "$(whoami)@$(hostname)"
+    fi
+
+    curl -fsSL "https://github.com/${GITHUB_USER}.keys" > "${ssh_dir}/authorized_keys"
+}
+
+setup_repos_dir() {
+    log "setting up repos directory"
+    mkdir -p "${REPOS_DIR}"
+
+    if [[ ! -d "${DOTFILES_DIR}" ]]; then
+        log "cloning dotfiles"
+        git clone -q git@github.com:angelini/dotfiles.git "${DOTFILES_DIR}"
+    fi
+}
+
+setup_vms_dir() {
+    log "setting up vms directory"
+    mkdir -p "${HOME}/vms"
+}
+
+test_github_keys() {
+    log "testing SSH keys with Github"
+
+    set +e
+    ssh -T git@github.com &> /dev/null
+
+    if [[ "${?}" == 255 ]]; then
+        error "SSH key not stored on Github, add it to: https://github.com/settings/keys"
+    fi
+    set -e
+}
+
+link_configs() {
+    log "linking user config files"
+    mkdir -p "${CONFIG_DIR}"
+
+    link "aliases"
+    link "gitconfig"
+    link "gitignore_global"
+    link "flake8" "${CONFIG_DIR}/flake8"
+
+    log "resetting bashrc"
+    rm -f "${HOME}/.bashrc"
+    link "bashrc"
+}
+
+install_utilities() {
+    install "bash-completion"
+    install "ca-certificates"
+    install "fd-find"
+    install "jq"
+    install "gnupg2"
+    install "ripgrep"
+    install "tree"
+    install "vim"
+
+    if [[ "$(detect_distro)" == "debian" ]]; then
+        if [[ ! -f "${BIN_DIR}/fd" ]]; then
+            ln -s "$(which fdfind)" "${BIN_DIR}/fd"
+        fi
+
+        install "apt-utils"
+        install "apt-transport-https"
+    fi
 }
 
 install_pyenv() {
-  local pyenv_dir="${HOME}/.pyenv"
-  if ! command_exists "pyenv"; then
-    echo "- installing pyenv"
-    git clone -q https://github.com/yyuu/pyenv.git "${pyenv_dir}"
-    git clone -q https://github.com/yyuu/pyenv-virtualenv.git "${pyenv_dir}/plugins/pyenv-virtualenv"
-  fi
-}
+    local pyenv_dir="${HOME}/.pyenv"
 
-install_bash_git_prompt() {
-  if [[ ! -d "./bash-git-prompt" ]]; then
-    echo "- installing bash-git-prompt"
-    git clone -q https://github.com/magicmonty/bash-git-prompt.git
-  fi
-  link "bash-git-prompt"
+    if ! bin_exists "pyenv"; then
+        log "installing pyenv"
+        git clone -q https://github.com/yyuu/pyenv.git "${pyenv_dir}"
 
-  if [[ ! -f "./git-completion.bash" ]]; then
-    echo "- installing git-bash-completion"
-    curl -O -fsSL https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
-  fi
-  link "git-completion.bash"
+        (
+            cd "${pyenv_dir}"
+            src/configure
+            make -C src
+        )
+    fi
 }
 
 install_rustup() {
-  if ! command_exists "rustc"; then
-    curl -fsSL https://sh.rustup.rs > /tmp/rustup_install
-    source /tmp/rustup_install -y
-  fi
+    if ! bin_exists "rustup"; then
+        log "installing rustup"
+        curl -fsSL https://sh.rustup.rs | bash -s -- -y
+    fi
 }
 
 install_nvm() {
-  if ! command_exists "nvm"; then
-    curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-  fi
+    if ! bin_exists "nvm"; then
+        log "installing nvm"
+        curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh" | bash
+    fi
 }
 
-install_cask() {
-  if ! command_exists "cask"; then
-    curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
-  fi
+install_java() {
+    if ! bin_exists "java"; then
+        case "$(detect_distro)" in
+            "debian")
+                install "openjdk-11-jdk/"
+                ;;
+            "fedora")
+                install "java-11-openjdk-devel"
+                ;;
+            *)
+                not_implemented
+                ;;
+        esac
+    fi
 }
 
-echo "= updating"
-${UPDATE}
-mkdir -p "${HOME}/bin"
+install_dev_toolchains() {
+    install "clang"
 
-if [[ "${DISTRO}" == "ubuntu" ]]; then
-  echo "= ubuntu specific"
-  rm "${HOME}/.bashrc"
-  install "apt-utils"
-  install "curl"
-fi
+    if [[ "$(detect_distro)" == "fedora" ]]; then
+        install "findutils"
+        install "bzip2-devel"
+        install "libffi-devel"
+        install "openssl-devel"
+        install "readline-devel"
+        install "sqlite-devel"
+        install "xz-devel"
+        install "zlib-devel"
+    fi
 
-if [[ "${DISTRO}" == "arch" ]]; then
-  echo "= arch specific"
-  link_config "dunst"
-  link_config "fontconfig"
-  link_config "i3"
-  link_config "i3status"
-  link_config "termite"
-fi
+    install_pyenv
+    install_rustup
+    install_nvm
+    install_java
 
-if [[ "${DISTRO}" == "fedora" ]]; then
-  echo "= fedora specific"
-  rm "${HOME}/.bashrc"
-  install "libffi-devel"
-  install "zlib-devel"
-  install "bzip2-devel"
-  install "sqlite-devel"
-  install "openssl-devel"
-  install "xz-devel"
-  install "findutils"
-fi
+    if [[ "$(pyenv global)" != "${PYTHON_VERSION}" ]]; then
+        pyenv install "${PYTHON_VERSION}" --skip-existing
+        pyenv global "${PYTHON_VERSION}"
+    fi
 
-echo "= dotfiles"
-link "bashrc"
-source "${HOME}/.bashrc"
-link "agignore"
-link "flake8"
-link "gitconfig"
-link "gitignore_global"
-link "tmux.conf"
-link "tmux-osx.conf"
-link "tmux-linux.conf"
+    pip install --upgrade pip > /dev/null
+}
 
-echo "= base"
-install "curl"
-install "tree"
-install "bash-completion"
-install "emacs"
-install "ripgrep"
+install_font() {
+    local name="${1}"
+    local uri="${2}"
+    local font_zip="${uri##*/}"
+    local fonts_dir="${HOME}/.fonts"
 
-if [[ "${DISTRO}" == "fedora" || "${DISTRO}" == "ubuntu" ]]; then
-  install "fd-find"
-  [[ "${DISTRO}" == "ubuntu" ]] && link_bin $(which fdfind) "fd"
-else
-  install "fd"
-fi
+    if ! fc-list | grep "${name}" &> /dev/null; then
+        log "installing font ${font_zip}"
 
-install_bash_git_prompt
+        mkdir -p "${fonts_dir}"
 
-if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
-  echo "= clang"
-  install "clang"
-fi
+        curl -fsSLO "${uri}"
+        unzip -o "${font_zip}" -d "${fonts_dir}" > /dev/null
+        fc-cache -fv > /dev/null
+        rm "${font_zip}"
+    fi
+}
 
-if [[ "${DISTRO}" != "fedora" ]]; then
-  echo "= ruby"
-  install "rbenv"
-  install "ruby-build"
-fi
+install_fonts() {
+    install_font "Ubuntu Mono Nerd Font" \
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/UbuntuMono.zip"
+}
 
-echo "= python"
-install_pyenv
+install_starship() {
+    if ! bin_exists "starship"; then
+        log "installing starship"
+        curl -fsSL https://starship.rs/install.sh | bash -s -- -y
+    fi
+}
 
-if [[ "$(pyenv global)" != "3.9.2" ]]; then
-  pyenv install 3.9.2 --skip-existing
-  pyenv global 3.9.2
-fi
+source_bashrc() {
+    log "sourcing .bashrc"
 
-echo "= node"
-install_nvm
+    set +u
+    source "${HOME}/.bashrc"
+    set -u
+}
 
-echo "= rust"
-install_rustup
+install_gcp_cli() {
+    if ! bin_exists "gcloud"; then
+        log "installing gcp cli"
 
-echo "= emacs-config"
-EMACS_DIR="${DIR}/../emacs-config"
+        case "$(detect_distro)" in
+            "debian")
+                echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+                    | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
 
-if [[ ! -d "${EMACS_DIR}" ]]; then
-  echo "- cloning"
-  git clone -q git@github.com:angelini/emacs-config.git "${EMACS_DIR}" > /dev/null
-  ln -s "${EMACS_DIR}" "${HOME}/.emacs.d"
-fi
-link "../emacs-config" "emacs.d"
+                curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+                    | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - > /dev/null
 
-echo "= cask"
-install_cask
-cd "${EMACS_DIR}"
-cask
-cd "${DIR}"
+                update_package_manager
+                ;;
+            "fedora")
+                sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo <<- EOM > /dev/null
+[google-cloud-sdk]
+name=Google Cloud SDK
+baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+    https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOM
+                ;;
+            *)
+                not_implemented
+                ;;
+        esac
+
+        install "google-cloud-sdk"
+        gcloud init --skip-diagnostics
+    fi
+}
+
+install_aws_cli() {
+    if ! check "aws"; then
+        log "installing aws cli"
+
+        case "$(arch)" in
+            "x86_64")
+                curl -fsSL -o "/tmp/awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+                ;;
+            "arm"*)
+                curl -fsSL -o "/tmp/awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip"
+                ;;
+            *)
+                not_implemented
+                ;;
+        esac
+
+        unzip -o "/tmp/awscliv2.zip" -d "${CLOUD_DIR}" > /dev/null
+        sudo "${CLOUD_DIR}/aws/install"
+    fi
+}
+
+setup_cloud_dir() {
+    log "setting up cloud directory"
+    mkdir -p "${CLOUD_DIR}"
+
+    install_gcp_cli
+    install_aws_cli
+}
+
+main() {
+    sudo echo "" > /dev/null
+    log "sudo access cached"
+
+    local os=$(detect_os)
+    log "detected os:     ${os}"
+
+    if [[ "${os}" != "linux" ]]; then
+        error "script only supports linux"
+    fi
+
+    local distro="$(detect_distro)"
+    log "detected distro: ${distro}"
+    log "detected arch:   $(arch)"
+
+    add_user_groups
+    update_hostname
+    update_package_manager
+
+    setup_bin_dir
+    setup_ssh_dir
+    setup_vms_dir
+
+    test_github_keys
+    install "git"
+    setup_repos_dir
+
+    link_configs
+    source_bashrc
+
+    install_utilities
+    install_dev_toolchains
+
+    setup_cloud_dir
+
+    install_fonts
+    install_starship
+
+    source_bashrc
+    log "setup successful"
+}
+
+main "$@"
