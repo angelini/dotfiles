@@ -73,7 +73,7 @@ update_package_manager() {
 
     case "$(detect_distro)" in
         "debian")
-            sudo apt update -y > /dev/null
+            sudo apt-get update -y > /dev/null
             ;;
         "fedora")
             sudo dnf update -y > /dev/null
@@ -89,7 +89,7 @@ check() {
 
     case "$(detect_distro)" in
         "debian")
-            dkpg -l "${package}" &> /dev/null
+            dpkg -l "${package}" &> /dev/null
             ;;
         "fedora")
             dnf list installed "${package}" &> /dev/null
@@ -108,7 +108,7 @@ install() {
 
         case "$(detect_distro)" in
             "debian")
-                sudo apt install -y "${package}" > /dev/null
+                sudo apt-get install -y "${package}" > /dev/null
                 ;;
             "fedora")
                 sudo dnf install -y "${package}" > /dev/null
@@ -127,7 +127,7 @@ link() {
         link="${2}"
     fi
 
-    if [[ ! -f "${link}" ]]; then
+    if [[ ! -e "${link}" ]]; then
         log "linking ${target} to ${link}"
         ln -s "${target}" "${link}"
     fi
@@ -378,7 +378,7 @@ EOM
 }
 
 install_aws_cli() {
-    if ! check "aws"; then
+    if ! bin_exists "aws"; then
         log "installing aws cli"
 
         case "$(arch)" in
