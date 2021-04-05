@@ -13,7 +13,7 @@ readonly REPOS_DIR="${HOME}/repos"
 readonly DOTFILES_DIR="${REPOS_DIR}/dotfiles"
 
 readonly PYTHON_VERSION="3.9.2"
-readonly NVM_VERSION="0.37.2"
+readonly NVM_INSTALL_VERSION="0.37.2"  # NVM_VERSION conflicts with nvm.sh
 
 log() {
     echo "$(date +"%H:%M:%S") - $(printf '%s' "$@")" 1>&2
@@ -204,7 +204,9 @@ link_configs() {
     link "aliases"
     link "gitconfig"
     link "gitignore_global"
+
     link "flake8" "${CONFIG_DIR}/flake8"
+    link "starship.toml" "${CONFIG_DIR}/starship.toml"
 
     log "resetting bashrc"
     rm -f "${HOME}/.bashrc"
@@ -256,7 +258,7 @@ install_rustup() {
 install_nvm() {
     if ! bin_exists "nvm"; then
         log "installing nvm"
-        curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh" | bash
+        curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_INSTALL_VERSION}/install.sh" | bash
     fi
 }
 
