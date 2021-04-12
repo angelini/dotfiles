@@ -244,6 +244,8 @@ install_utilities() {
 
         install "apt-utils"
         install "apt-transport-https"
+        install "fontconfig"
+        install "unzip"
     fi
 }
 
@@ -308,6 +310,12 @@ install_dev_toolchains() {
 
     if [[ "$(detect_distro)" == "debian" ]]; then
         install "build-essential"
+        install "libbz2-dev"
+        install "libffi-dev"
+        install "libssl-dev"
+        install "libreadline-dev"
+        install "libsqlite3-dev"
+        install "xz-utils"
         install "zlib1g-dev"
     fi
 
