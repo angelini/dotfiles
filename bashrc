@@ -24,6 +24,11 @@ export HISTFILESIZE=1000000
 shopt -s histappend
 export PROMPT_COMMAND="history -a"
 
+# SSH-agent
+if bin_exists "keychain"; then
+    eval "$(keychain --eval id_ed25519)"
+fi
+
 # Clang
 if bin_exists "clang"; then
     export CC="/usr/bin/clang"

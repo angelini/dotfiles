@@ -231,8 +231,10 @@ install_utilities() {
     install "bash-completion"
     install "ca-certificates"
     install "fd-find"
-    install "jq"
+    install "findutils"
     install "gnupg2"
+    install "jq"
+    install "keychain"
     install "ripgrep"
     install "tree"
     install "vim"
@@ -298,7 +300,6 @@ install_dev_toolchains() {
     install "clang"
 
     if [[ "$(detect_distro)" == "fedora" ]]; then
-        install "findutils"
         install "bzip2-devel"
         install "libffi-devel"
         install "openssl-devel"
@@ -315,6 +316,7 @@ install_dev_toolchains() {
         install "libssl-dev"
         install "libreadline-dev"
         install "libsqlite3-dev"
+        install "pkg-config"
         install "xz-utils"
         install "zlib1g-dev"
     fi
