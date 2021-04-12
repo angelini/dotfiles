@@ -5,6 +5,7 @@
 set -euo pipefail
 
 readonly GITHUB_USER="angelini"
+readonly LOCALE="en_US.UTF-8"
 
 readonly CONFIG_DIR="${HOME}/.config"
 readonly BIN_DIR="${HOME}/bin"
@@ -130,6 +131,19 @@ link() {
     if [[ ! -e "${link}" ]]; then
         log "linking ${target} to ${link}"
         ln -s "${target}" "${link}"
+    fi
+}
+
+update_locale() {
+    if [[ "${LANG}" != "${LOCALE}" ]]; then
+        log "update locale to ${LOCALE}"
+
+        if [[ "$(detect_distro)" == "debian" ]]; then
+            sudo locale-gen "${LOCALE}"
+        fi
+
+        localectl set-locale "LANG=${LOCALE}"
+        error "locale changed, open a new shell and run again"
     fi
 }
 
@@ -266,7 +280,7 @@ install_java() {
     if ! bin_exists "java"; then
         case "$(detect_distro)" in
             "debian")
-                install "openjdk-11-jdk/"
+                install "openjdk-11-jdk"
                 ;;
             "fedora")
                 install "java-11-openjdk-devel"
@@ -290,6 +304,11 @@ install_dev_toolchains() {
         install "sqlite-devel"
         install "xz-devel"
         install "zlib-devel"
+    fi
+
+    if [[ "$(detect_distro)" == "debian" ]]; then
+        install "build-essential"
+        install "zlib1g-dev"
     fi
 
     install_pyenv
@@ -424,6 +443,7 @@ main() {
     log "detected arch:   $(arch)"
 
     add_user_groups
+    update_locale
     update_hostname
     update_package_manager
 
