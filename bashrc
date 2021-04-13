@@ -6,8 +6,23 @@ bin_exists() {
     type -t "${1}" &> /dev/null
 }
 
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+detect_os() {
+    if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
+        echo "linux"
+    elif [[ "${OSTYPE}" == "darwin" ]]; then
+        echo "macos"
+    else
+        echo "unknown"
+    fi
+}
+
+is_wsl() {
+    if [[ "$(detect_os)" == "linux" ]]; then
+        grep -q "microsoft" "/proc/sys/kernel/osrelease"
+    else
+        return 1
+    fi
+}
 
 export PATH="${HOME}/bin:${HOME}/.local/bin:/usr/local/bin:/usr/local/sbin:${PATH}"
 export EDITOR=vim
@@ -27,6 +42,7 @@ export PROMPT_COMMAND="history -a"
 # SSH-agent
 if bin_exists "keychain"; then
     eval "$(keychain --eval id_ed25519)"
+    export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
 fi
 
 # Clang
@@ -85,7 +101,7 @@ if [[ -d "${GCP_SDK_DIR}" ]]; then
 fi
 
 # WSL
-if [[ "${OSTYPE}" == "linux-gnu"* ]] && grep -q "Microsoft" /proc/sys/kernel/osrelease; then
+if is_wsl; then
     export DISPLAY=:0.0
 fi
 
@@ -97,9 +113,6 @@ KUBE_CONFIG_DIR="${HOME}/.kube"
 if [[ -d "${KUBE_CONFIG_DIR}" ]]; then
     export KUBECONFIG="${KUBE_CONFIG_DIR}/config:${KUBE_CONFIG_DIR}/eksconfig"
 fi
-
-# SSH-Agent
-export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
 
 # Fedora Server
 if [[ "$(hostname)" == "fedora-server" ]]; then

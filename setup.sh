@@ -69,6 +69,14 @@ detect_distro() {
     fi
 }
 
+is_wsl() {
+    if [[ "$(detect_os)" == "linux" ]]; then
+        grep -q "microsoft" "/proc/sys/kernel/osrelease"
+    else
+        return 1
+    fi
+}
+
 update_package_manager() {
     log "updating package manager"
 
@@ -90,7 +98,7 @@ check() {
 
     case "$(detect_distro)" in
         "debian")
-            dpkg -l "${package}" &> /dev/null
+            dpkg -s "${package}" &> /dev/null
             ;;
         "fedora")
             dnf list installed "${package}" &> /dev/null
@@ -142,7 +150,11 @@ update_locale() {
             sudo locale-gen "${LOCALE}"
         fi
 
-        localectl set-locale "LANG=${LOCALE}"
+        if is_wsl; then
+            sudo update-locale "LANG=${LOCALE}"
+        else
+            sudo localectl set-locale "LANG=${LOCALE}"
+        fi
         error "locale changed, open a new shell and run again"
     fi
 }
