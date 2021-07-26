@@ -28,3 +28,15 @@ install() {
         sudo dnf install -y "${package}" > /dev/null
     fi
 }
+
+add_dnf_repo() {
+    local name="${1}"
+    local uri="${2}"
+
+    log "install DNF repo ${name}"
+
+    install dnf-plugins-core
+    if ! dnf repolist enabled | grep "${name}" > /dev/null; then
+        sudo dnf config-manager --add-repo "${uri}"
+    fi
+}

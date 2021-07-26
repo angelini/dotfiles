@@ -6,16 +6,9 @@ set -euo pipefail
 
 source "${BASH_SOURCE%/*}/common.sh"
 
-# TODO: `sudo usermod -a -G docker "${USER}"`
-
 install_virtualization() {
     log "install virtualization"
     sudo dnf group install -y virtualization > /dev/null
-}
-
-install_containerd() {
-    install containerd
-    sudo systemctl enable containerd > /dev/null
 }
 
 set_cgroups_v1() {
@@ -37,14 +30,31 @@ enable_nested_virtualization() {
     sudo sed -i 's/#options kvm_amd nested=1/options kvm_amd nested=1/' /etc/modprobe.d/kvm.conf
 }
 
+add_docker_repo() {
+    add_dnf_repo "docker-ce" "https://download.docker.com/linux/fedora/docker-ce.repo"
+}
+
+install_docker() {
+    install docker-ce
+    install docker-ce-cli
+    sudo usermod -a -G docker "${USER}"
+}
+
+install_containerd() {
+    install containerd.io
+    sudo systemctl enable containerd > /dev/null
+}
+
 main() {
     if ! grep -q -E "svm|vmx" /proc/cpuinfo; then
         error "Hardware virtualization not supported"
     fi
 
+    add_docker_repo
     update_dnf
 
     install_virtualization
+    install_docker
     install_containerd
 
     set_cgroups_v1
