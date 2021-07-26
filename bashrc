@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1091
 # shellcheck disable=SC2155
-# shellcheck disable=SC1090
 
 bin_exists() {
     type -t "${1}" &> /dev/null
@@ -111,7 +111,7 @@ export HOMEBREW_NO_ANALYTICS=1
 # K8S
 KUBE_CONFIG_DIR="${HOME}/.kube"
 if [[ -d "${KUBE_CONFIG_DIR}" ]]; then
-    export KUBECONFIG="${KUBE_CONFIG_DIR}/config:${KUBE_CONFIG_DIR}/eksconfig"
+    export KUBECONFIG="${KUBE_CONFIG_DIR}/config"
 fi
 
 # Fedora Server
@@ -124,6 +124,11 @@ fi
 if bin_exists "starship"; then
     export STARSHIP_PREEXEC_READY=false
     eval "$(starship init bash)"
+fi
+
+# Mkcert
+if bin_exists "mkcert"; then
+    export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
 fi
 
 # Utility Functions

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 # shellcheck disable=SC2155
 
 set -euo pipefail
 
 source "${BASH_SOURCE%/*}/common.sh"
+
+# TODO: `sudo usermod -a -G docker "${USER}"`
 
 install_virtualization() {
     log "install virtualization"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 # shellcheck disable=SC2155
 
 set -euo pipefail
@@ -7,13 +7,11 @@ set -euo pipefail
 source "${BASH_SOURCE%/*}/common.sh"
 
 readonly FLANNEL_YAML="https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
+readonly NETWORK_CIDR="10.244.0.0/16"
 
 create_cluster() {
-    local network_cidr="${1}"
-
-    log "create cluster on ${network_cidr}"
-
-    sudo kubeadm init --pod-network-cidr="${network_cidr}" \
+    log "create cluster on ${NETWORK_CIDR}"
+    sudo kubeadm init --pod-network-cidr="${NETWORK_CIDR}" \
         --cri-socket=/run/containerd/containerd.sock
 }
 
@@ -42,13 +40,7 @@ untaint_master_node() {
 }
 
 main() {
-    if [[ "$#" -ne 1 ]]; then
-        error "Usage: ${0} <network_cidr>"
-    fi
-    local network_cidr="${1}"
-
-    create_cluster "${network_cidr}"
-
+    create_cluster
     setup_kube_config
 
     add_flannel
