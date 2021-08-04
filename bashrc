@@ -71,10 +71,11 @@ if [[ -d "${HOME}/.cargo" ]]; then
 fi
 
 # Golang
+export GOROOT="/usr/local/go"
+export PATH="${PATH}:${GOROOT}/bin"
 if bin_exists "go"; then
     export GOPATH="${HOME}"
     export GO111MODULE=on
-    export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
 fi
 
 # Java

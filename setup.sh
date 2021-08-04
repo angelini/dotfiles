@@ -15,6 +15,7 @@ readonly DOTFILES_DIR="${REPOS_DIR}/dotfiles"
 
 readonly PYTHON_VERSION="3.9.2"
 readonly NVM_INSTALL_VERSION="0.38.0"  # NVM_VERSION conflicts with nvm.sh
+readonly GO_VERSION="1.16.6"
 
 log() {
     echo "$(date +"%H:%M:%S") - $(printf '%s' "$@")" 1>&2
@@ -308,8 +309,17 @@ install_java() {
     fi
 }
 
+install_go() {
+    if ! bin_exists "go"; then
+        log "installing go"
+        curl -fsSL -o "/tmp/golang.tar.gz" "https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+        sudo tar -C "/usr/local" -xzf "/tmp/golang.tar.gz"
+    fi
+}
+
 install_dev_toolchains() {
     install "clang"
+    install "protobuf-compiler"
 
     if [[ "$(detect_distro)" == "fedora" ]]; then
         install "bzip2-devel"
@@ -337,6 +347,7 @@ install_dev_toolchains() {
     install_rustup
     install_nvm
     install_java
+    install_go
 
     if [[ "$(pyenv global)" != "${PYTHON_VERSION}" ]]; then
         pyenv install "${PYTHON_VERSION}" --skip-existing
