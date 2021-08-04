@@ -16,6 +16,7 @@ readonly DOTFILES_DIR="${REPOS_DIR}/dotfiles"
 readonly PYTHON_VERSION="3.9.2"
 readonly NVM_INSTALL_VERSION="0.38.0"  # NVM_VERSION conflicts with nvm.sh
 readonly GO_VERSION="1.16.6"
+readonly DUST_VERSION="0.6.1"
 readonly HELM_VERSION="3.6.3"
 readonly EJSON_VERSION="1.3.0"
 readonly MKCERT_VERSION="1.4.3"
@@ -320,20 +321,6 @@ install_go() {
     fi
 }
 
-install_helm() {
-    local tmp_dir="/tmp/helm"
-    local tmp_tar="/tmp/helm.tar.gz"
-    local path="${HOME}/bin/helm"
-
-    if ! bin_exists "helm"; then
-        log "installing helm"
-        curl -fsSL -o "${tmp_tar}" "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
-        tar -C "${tmp_dir}" -xzf "${tmp_tar}"
-        mv "${tmp_dir}/linux-amd64/helm" "${path}"
-        chmod +x "${path}"
-    fi
-}
-
 install_github_bin() {
     local name="${1}"
     local uri="${2}"
@@ -344,6 +331,24 @@ install_github_bin() {
         log "installing ${name}"
         curl -fsSL -o "${path}" "${uri}"
         chmod +x "${path}"
+    fi
+}
+
+install_github_tar() {
+    local name="${1}"
+    local target="${2}"
+    local uri="${3}"
+
+    local tmp="$(mktemp -d -t github-tar-XXXXX)"
+    local tmp_tar="${tmp}/release.tar"
+    local bin_path="${HOME}/bin/${name}"
+
+    if ! bin_exists "${name}"; then
+        log "installing ${name}"
+        curl -fsSL -o "${tmp_tar}" "${uri}"
+        tar -C "${tmp}" -xzf "${tmp_tar}"
+        mv "${tmp}/${target}" "${bin_path}"
+        chmod +x "${bin_path}"
     fi
 }
 
@@ -379,12 +384,14 @@ install_dev_toolchains() {
     install_github_bin "ejson" "https://github.com/Shopify/ejson/releases/download/v${EJSON_VERSION}/linux-amd64"
     install_github_bin "mkcert" "https://github.com/FiloSottile/mkcert/releases/download/v${MKCERT_VERSION}/mkcert-v${MKCERT_VERSION}-linux-amd64"
 
+    install_github_tar "helm" "linux-amd64/helm" "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+    install_github_tar "dust" "dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu/dust" "https://github.com/bootandy/dust/releases/download/v${DUST_VERSION}/dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+
     install_pyenv
     install_rustup
     install_nvm
     install_java
     install_go
-    install_helm
 
     if [[ "$(pyenv global)" != "${PYTHON_VERSION}" ]]; then
         pyenv install "${PYTHON_VERSION}" --skip-existing
