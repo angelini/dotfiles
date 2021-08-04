@@ -14,7 +14,7 @@ readonly REPOS_DIR="${HOME}/repos"
 readonly DOTFILES_DIR="${REPOS_DIR}/dotfiles"
 
 readonly PYTHON_VERSION="3.9.2"
-readonly NVM_INSTALL_VERSION="0.37.2"  # NVM_VERSION conflicts with nvm.sh
+readonly NVM_INSTALL_VERSION="0.38.0"  # NVM_VERSION conflicts with nvm.sh
 
 log() {
     echo "$(date +"%H:%M:%S") - $(printf '%s' "$@")" 1>&2
