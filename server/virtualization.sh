@@ -38,11 +38,17 @@ install_docker() {
     install docker-ce
     install docker-ce-cli
     sudo usermod -a -G docker "${USER}"
+    sudo systemctl enable docker > /dev/null
 }
 
 install_containerd() {
+    local config="/etc/containerd/config.toml"
+
     install containerd.io
     sudo systemctl enable containerd > /dev/null
+
+    containerd config default | sudo tee "${config}" > /dev/null
+    sudo sed -i '/\[plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc.options\]/a \            SystemdCgroup = true' "${config}"
 }
 
 main() {
