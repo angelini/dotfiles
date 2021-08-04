@@ -35,7 +35,6 @@ Name=${interface}
 
 [Network]
 Address=10.1.1.3/24
-Gateway=10.1.1.0
 EOF
 
     sudo tee /etc/systemd/network/20-bridge.netdev > /dev/null <<EOF

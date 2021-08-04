@@ -37,6 +37,8 @@ add_docker_repo() {
 install_docker() {
     install docker-ce
     install docker-ce-cli
+    install docker-compose
+
     sudo usermod -a -G docker "${USER}"
     sudo systemctl enable docker > /dev/null
 }

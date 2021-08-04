@@ -130,6 +130,10 @@ fi
 # Mkcert
 if bin_exists "mkcert"; then
     export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
+
+    if [[ -f "$(mkcert -CAROOT)/rootCA.pem" ]]; then
+        export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
+    fi
 fi
 
 # Utility Functions
