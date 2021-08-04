@@ -73,9 +73,10 @@ set_firewall_zone() {
     sudo firewall-cmd --set-default-zone "${zone}"
 }
 
-restart_iwd() {
+start_iwd() {
     log "restart iwd"
-    sudo systemctl restart iwd
+    sudo systemctl start iwd
+    sudo systemctl enable iwd > /dev/null
 }
 
 start_networkd() {
@@ -113,8 +114,8 @@ main() {
 
     set_firewall_zone "trusted"
 
-    restart_iwd
     stop_nm
+    start_iwd
     start_networkd
     remove_nm
 }

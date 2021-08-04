@@ -21,9 +21,10 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 }
 
-enable_br_netfilter() {
-    log "enable br_netfilter"
-    sudo tee /etc/modules-load.d/netfilter.conf > /dev/null <<EOF
+enable_kernel_modules() {
+    log "enable kernel modules"
+    sudo tee /etc/modules-load.d/containerd.conf > /dev/null <<EOF
+overlay
 br_netfilter
 EOF
 }
@@ -61,7 +62,7 @@ link_cni_bins() {
 main() {
     disable_swap
     enable_iptables_bridged_traffic
-    enable_br_netfilter
+    enable_kernel_modules
 
     add_k8s_repo
     update_dnf

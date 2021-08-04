@@ -37,6 +37,6 @@ add_dnf_repo() {
 
     install dnf-plugins-core
     if ! dnf repolist enabled | grep "${name}" > /dev/null; then
-        sudo dnf config-manager --add-repo "${uri}"
+        sudo dnf config-manager --add-repo "${uri}" > /dev/null
     fi
 }
