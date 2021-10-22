@@ -136,6 +136,17 @@ if bin_exists "mkcert"; then
     fi
 fi
 
+# Nix
+if [[ -f "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]]; then
+    source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+    export LOCALE_ARCHIVE="$(readlink ~/.nix-profile/lib/locale)/locale-archive"
+    export XDG_DATA_DIRS="$HOME/.nix-profile/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+fi
+
+if bin_exists "direnv"; then
+    eval "$(direnv hook bash)"
+fi
+
 # Utility Functions
 epoch() {
     local seconds="${1}"

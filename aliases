@@ -1,10 +1,33 @@
 #!/usr/bin/env bash
 
+source ~/.bash_completion.d/complete_alias
+
 alias l="ls -hlAG"
 alias gs="git status"
 alias gc="git checkout"
+complete -F _complete_alias gc
 alias ga="git commit --amend --no-edit"
 alias gpo='git push origin $(git rev-parse --abbrev-ref HEAD)'
 alias gpfo='git push origin +$(git rev-parse --abbrev-ref HEAD)'
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative --max-count=25"
 alias rgc="rg -C 30"
+alias ip="ip -c=auto"
+alias sct="systemctl status"
+complete -F _complete_alias sct
+alias sc="sudo systemctl"
+complete -F _complete_alias sc
+
+# Gadget
+
+pod_names() {
+    local ns="${1}"
+    local filter="${2}"
+
+    kubectl -n "${ns}" get pods -l "${filter}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
+}
+
+alias kcg="kubectl -n gadget-app-sandbox-development"
+alias kct="kubectl -n gadget-app-sandbox-test"
+
+alias gsp="pod_names gadget-app-sandbox-development environmentName=js-sandbox"
+alias gst="pod_names gadget-app-sandbox-test environmentName=js-sandbox"

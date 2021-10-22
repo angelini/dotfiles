@@ -244,12 +244,54 @@ link_configs() {
     link "bashrc"
 }
 
+install_alias_complete() {
+    local dir="${HOME}/.bash_completion.d"
+
+    if [[ ! -f "${dir}/complete_alias" ]]; then
+        log "installing alias complete"
+        mkdir -p "${dir}"
+        curl -fsSL "https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias" > "${dir}/complete_alias"
+    fi
+}
+
+install_github_bin() {
+    local name="${1}"
+    local uri="${2}"
+
+    local path="${HOME}/bin/${name}"
+
+    if ! bin_exists "${name}"; then
+        log "installing ${name}"
+        curl -fsSL -o "${path}" "${uri}"
+        chmod +x "${path}"
+    fi
+}
+
+install_github_tar() {
+    local name="${1}"
+    local target="${2}"
+    local uri="${3}"
+
+    local tmp="$(mktemp -d -t github-tar-XXXXX)"
+    local tmp_tar="${tmp}/release.tar"
+    local bin_path="${HOME}/bin/${name}"
+
+    if ! bin_exists "${name}"; then
+        log "installing ${name}"
+        curl -fsSL -o "${tmp_tar}" "${uri}"
+        tar -C "${tmp}" -xzf "${tmp_tar}"
+        mv "${tmp}/${target}" "${bin_path}"
+        chmod +x "${bin_path}"
+    fi
+}
+
 install_utilities() {
     install "bash-completion"
     install "ca-certificates"
     install "fd-find"
     install "findutils"
     install "gnupg2"
+    install "htop"
     install "jq"
     install "keychain"
     install "ripgrep"
@@ -266,6 +308,10 @@ install_utilities() {
         install "fontconfig"
         install "unzip"
     fi
+
+    install_github_tar "dust" \
+        "dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu/dust" \
+        "https://github.com/bootandy/dust/releases/download/v${DUST_VERSION}/dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 }
 
 install_pyenv() {
@@ -321,37 +367,6 @@ install_go() {
     fi
 }
 
-install_github_bin() {
-    local name="${1}"
-    local uri="${2}"
-
-    local path="${HOME}/bin/${name}"
-
-    if ! bin_exists "${name}"; then
-        log "installing ${name}"
-        curl -fsSL -o "${path}" "${uri}"
-        chmod +x "${path}"
-    fi
-}
-
-install_github_tar() {
-    local name="${1}"
-    local target="${2}"
-    local uri="${3}"
-
-    local tmp="$(mktemp -d -t github-tar-XXXXX)"
-    local tmp_tar="${tmp}/release.tar"
-    local bin_path="${HOME}/bin/${name}"
-
-    if ! bin_exists "${name}"; then
-        log "installing ${name}"
-        curl -fsSL -o "${tmp_tar}" "${uri}"
-        tar -C "${tmp}" -xzf "${tmp_tar}"
-        mv "${tmp}/${target}" "${bin_path}"
-        chmod +x "${bin_path}"
-    fi
-}
-
 install_dev_toolchains() {
     install "clang"
     install "protobuf-compiler"
@@ -381,11 +396,14 @@ install_dev_toolchains() {
         install "zlib1g-dev"
     fi
 
-    install_github_bin "ejson" "https://github.com/Shopify/ejson/releases/download/v${EJSON_VERSION}/linux-amd64"
-    install_github_bin "mkcert" "https://github.com/FiloSottile/mkcert/releases/download/v${MKCERT_VERSION}/mkcert-v${MKCERT_VERSION}-linux-amd64"
+    install_github_bin "ejson" \
+        "https://github.com/Shopify/ejson/releases/download/v${EJSON_VERSION}/linux-amd64"
+    install_github_bin "mkcert" \
+        "https://github.com/FiloSottile/mkcert/releases/download/v${MKCERT_VERSION}/mkcert-v${MKCERT_VERSION}-linux-amd64"
 
-    install_github_tar "helm" "linux-amd64/helm" "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
-    install_github_tar "dust" "dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu/dust" "https://github.com/bootandy/dust/releases/download/v${DUST_VERSION}/dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+    install_github_tar "helm" \
+        "linux-amd64/helm" \
+        "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
 
     install_pyenv
     install_rustup
@@ -531,6 +549,8 @@ main() {
     test_github_keys
     install "git"
     setup_repos_dir
+
+    install_alias_complete
 
     link_configs
     source_bashrc
