@@ -478,7 +478,7 @@ install_fonts() {
 install_starship() {
     if ! bin_exists "starship"; then
         log "installing starship"
-        curl -fsSL https://starship.rs/install.sh | bash -s -- -y
+        curl -fsSL https://starship.rs/install.sh | sh -s -- -y
     fi
 }
 
