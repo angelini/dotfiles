@@ -198,7 +198,8 @@ setup_ssh_dir() {
         ssh-keygen -t ed25519 -a 100 -q -N "" -f "${ssh_dir}/id_ed25519" -C "$(whoami)@$(hostname)"
     fi
 
-    curl -fsSL "https://github.com/${GITHUB_USER}.keys" > "${ssh_dir}/authorized_keys"
+    curl -fsSL "https://github.com/${GITHUB_USER}.keys" >> "${ssh_dir}/authorized_keys"
+    awk -i inplace '!seen[$0]++' "${ssh_dir}/authorized_keys"
 }
 
 setup_repos_dir() {
