@@ -64,6 +64,16 @@ detect_os() {
     fi
 }
 
+detect_arch() {
+    local arch="$(arch)"
+
+    if [[ "${arch}" == amd* || "${arch}" == aarch* ]]; then
+        echo "arm"
+    else
+        echo "x86"
+    fi
+}
+
 detect_distro() {
     if bin_exists "apt-get"; then
         echo "debian"
@@ -363,7 +373,15 @@ install_java() {
 install_go() {
     if ! bin_exists "go"; then
         log "installing go"
-        curl -fsSL -o "/tmp/golang.tar.gz" "https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+
+        case "$(detect_arch)" in
+            "x86")
+                curl -fsSL -o "/tmp/golang.tar.gz" "https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+                ;;
+            "arm")
+                curl -fsSL -o "/tmp/golang.tar.gz" "https://golang.org/dl/go${GO_VERSION}.linux-arm64.tar.gz"
+                ;;
+        esac
         sudo tar -C "/usr/local" -xzf "/tmp/golang.tar.gz"
     fi
 }
@@ -397,14 +415,28 @@ install_dev_toolchains() {
         install "zlib1g-dev"
     fi
 
-    install_github_bin "ejson" \
-        "https://github.com/Shopify/ejson/releases/download/v${EJSON_VERSION}/linux-amd64"
-    install_github_bin "mkcert" \
-        "https://github.com/FiloSottile/mkcert/releases/download/v${MKCERT_VERSION}/mkcert-v${MKCERT_VERSION}-linux-amd64"
+    case "$(detect_arch)" in
+        "x86")
+            install_github_bin "ejson" \
+                "https://github.com/Shopify/ejson/releases/download/v${EJSON_VERSION}/linux-amd64"
+            install_github_bin "mkcert" \
+                "https://github.com/FiloSottile/mkcert/releases/download/v${MKCERT_VERSION}/mkcert-v${MKCERT_VERSION}-linux-amd64"
 
-    install_github_tar "helm" \
-        "linux-amd64/helm" \
-        "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+            install_github_tar "helm" \
+                "linux-amd64/helm" \
+                "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+            ;;
+        "arm")
+            install_github_bin "ejson" \
+                "https://github.com/Shopify/ejson/releases/download/v${EJSON_VERSION}/linux-arm64"
+            install_github_bin "mkcert" \
+                "https://github.com/FiloSottile/mkcert/releases/download/v${MKCERT_VERSION}/mkcert-v${MKCERT_VERSION}-linux-arm64"
+
+            install_github_tar "helm" \
+                "linux-arm64/helm" \
+                "https://get.helm.sh/helm-v${HELM_VERSION}-linux-arm64.tar.gz"
+            ;;
+    esac
 
     install_pyenv
     install_rustup
@@ -498,15 +530,12 @@ install_aws_cli() {
     if ! bin_exists "aws"; then
         log "installing aws cli"
 
-        case "$(arch)" in
-            "x86_64")
+        case "$(detect_arch)" in
+            "x86")
                 curl -fsSL -o "/tmp/awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
                 ;;
-            "arm"*)
+            "arm")
                 curl -fsSL -o "/tmp/awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip"
-                ;;
-            *)
-                not_implemented
                 ;;
         esac
 
@@ -535,8 +564,9 @@ main() {
     fi
 
     local distro="$(detect_distro)"
+    local arch="$(detect_arch)"
     log "detected distro: ${distro}"
-    log "detected arch:   $(arch)"
+    log "detected arch:   ${arch}"
 
     add_user_groups
     update_locale
