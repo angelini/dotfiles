@@ -31,3 +31,8 @@ alias kct="kubectl -n gadget-app-sandbox-test"
 
 alias gsp="pod_names gadget-app-sandbox-development environmentName=js-sandbox"
 alias gst="pod_names gadget-app-sandbox-test environmentName=js-sandbox"
+
+# Fusion
+
+alias kf="/home/alex/repos/fusion/bin/k3s kubectl"
+alias kff="/home/alex/repos/fusion/bin/k3s kubectl -n fusion"

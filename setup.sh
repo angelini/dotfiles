@@ -14,7 +14,7 @@ readonly REPOS_DIR="${HOME}/repos"
 readonly DOTFILES_DIR="${REPOS_DIR}/dotfiles"
 
 readonly PYTHON_VERSION="3.9.2"
-readonly NVM_INSTALL_VERSION="0.38.0"  # NVM_VERSION conflicts with nvm.sh
+readonly NVM_INSTALL_VERSION="0.39.1"  # NVM_VERSION conflicts with nvm.sh
 readonly GO_VERSION="1.19.1"
 readonly DUST_VERSION="0.6.1"
 readonly HELM_VERSION="3.6.3"

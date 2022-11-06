@@ -39,12 +39,6 @@ export HISTFILESIZE=1000000
 shopt -s histappend
 export PROMPT_COMMAND="history -a"
 
-# SSH-agent
-if bin_exists "keychain"; then
-    eval "$(keychain --eval id_ed25519)"
-    export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
-fi
-
 # Clang
 if bin_exists "clang"; then
     export CC="/usr/bin/clang"
@@ -110,10 +104,10 @@ fi
 export HOMEBREW_NO_ANALYTICS=1
 
 # K8S
-KUBE_CONFIG_DIR="${HOME}/.kube"
-if [[ -d "${KUBE_CONFIG_DIR}" ]]; then
-    export KUBECONFIG="${KUBE_CONFIG_DIR}/config"
-fi
+# KUBE_CONFIG_DIR="${HOME}/.kube"
+# if [[ -d "${KUBE_CONFIG_DIR}" ]]; then
+#     export KUBECONFIG="${KUBE_CONFIG_DIR}/config"
+# fi
 
 # Fedora Server
 if [[ "$(hostname)" == "fedora-server" ]]; then
