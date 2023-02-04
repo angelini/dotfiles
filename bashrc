@@ -134,11 +134,17 @@ fi
 if [[ -f "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]]; then
     source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
     export LOCALE_ARCHIVE="$(readlink ~/.nix-profile/lib/locale)/locale-archive"
-    export XDG_DATA_DIRS="$HOME/.nix-profile/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+    export XDG_DATA_DIRS="${HOME}/.nix-profile/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 fi
 
 if bin_exists "direnv"; then
     eval "$(direnv hook bash)"
+fi
+
+# Deno
+export DENO_INSTALL="${HOME}/.deno"
+if [[ -d "${DENO_INSTALL}" ]]; then
+    export PATH="${DENO_INSTALL}/bin:${PATH}"
 fi
 
 # Utility Functions

@@ -36,3 +36,8 @@ alias gst="pod_names gadget-app-sandbox-test environmentName=js-sandbox"
 
 alias kf="/home/alex/repos/fusion/bin/k3s kubectl"
 alias kff="/home/alex/repos/fusion/bin/k3s kubectl -n fusion"
+
+# Mesh
+
+alias km="/home/alex/repos/mesh/bin/k3s kubectl"
+alias kmm="/home/alex/repos/mesh/bin/k3s kubectl -n mesh"
