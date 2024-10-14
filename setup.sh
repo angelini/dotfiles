@@ -13,13 +13,10 @@ readonly CLOUD_DIR="${HOME}/cloud"
 readonly REPOS_DIR="${HOME}/repos"
 readonly DOTFILES_DIR="${REPOS_DIR}/dotfiles"
 
-readonly PYTHON_VERSION="3.9.2"
-readonly NVM_INSTALL_VERSION="0.39.1"  # NVM_VERSION conflicts with nvm.sh
-readonly GO_VERSION="1.19.1"
-readonly DUST_VERSION="0.6.1"
-readonly HELM_VERSION="3.6.3"
-readonly EJSON_VERSION="1.3.0"
-readonly MKCERT_VERSION="1.4.3"
+readonly NVM_INSTALL_VERSION="0.40.1"  # NVM_VERSION conflicts with nvm.sh
+readonly GO_VERSION="1.23.2"
+readonly DUST_VERSION="1.1.1"
+readonly HELM_VERSION="3.16.1"
 
 log() {
     echo "$(date +"%H:%M:%S") - $(printf '%s' "$@")" 1>&2
@@ -33,7 +30,9 @@ error() {
 }
 
 not_implemented() {
-    error "not implemented"
+    local component="${1}"
+
+    error "not implemented: ${component}"
 }
 
 ask() {
@@ -57,7 +56,7 @@ bin_exists() {
 detect_os() {
     if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
         echo "linux"
-    elif [[ "${OSTYPE}" == "darwin" ]]; then
+    elif [[ "${OSTYPE}" == "darwin"* ]]; then
         echo "macos"
     else
         echo "unknown"
@@ -67,11 +66,15 @@ detect_os() {
 detect_arch() {
     local arch="$(arch)"
 
-    if [[ "${arch}" == amd* || "${arch}" == aarch* ]]; then
+    if [[ "${arch}" == arm* || "${arch}" == aarch* ]]; then
         echo "arm"
     else
         echo "x86"
     fi
+}
+
+detect_os_and_arch() {
+    echo "$(detect_os)-$(detect_arch)"
 }
 
 detect_distro() {
@@ -79,22 +82,18 @@ detect_distro() {
         echo "debian"
     elif bin_exists "dnf"; then
         echo "fedora"
+    elif bin_exists "brew"; then
+        echo "macos"
     else
         error "unknown distro"
     fi
 }
 
-is_wsl() {
-    if [[ "$(detect_os)" == "linux" ]]; then
-        grep -q "microsoft" "/proc/sys/kernel/osrelease"
-    else
-        return 1
-    fi
+update_macos_package_manager() {
+    brew upgrade > /dev/null
 }
 
-update_package_manager() {
-    log "updating package manager"
-
+update_linux_package_manager() {
     case "$(detect_distro)" in
         "debian")
             sudo apt-get update -y > /dev/null
@@ -103,12 +102,28 @@ update_package_manager() {
             sudo dnf update -y > /dev/null
             ;;
         *)
-            not_implemented
+            not_implemented "update package manager for $(detect_distro)"
             ;;
     esac
 }
 
-check() {
+update_package_manager() {
+    log "updating package manager"
+
+    case "$(detect_os)" in
+        "linux")
+            update_linux_package_manager
+            ;;
+        "macos")
+            update_macos_package_manager
+            ;;
+        *)
+            not_implemented "update package manager for $(detect_os)"
+            ;;
+    esac
+}
+
+check_linux() {
     local package="${1}"
 
     case "$(detect_distro)" in
@@ -119,9 +134,51 @@ check() {
             dnf list installed "${package}" &> /dev/null
             ;;
         *)
-            not_implemented
+            not_implemented "check linux package manager for $(detect_distro)"
             ;;
     esac
+}
+
+check_macos() {
+    local package="${1}"
+
+    brew list "${package}" &> /dev/null
+}
+
+check() {
+    local package="${1}"
+
+    case "$(detect_os)" in
+        "linux")
+            check_linux "${package}"
+            ;;
+        "macos")
+            check_macos "${package}"
+            ;;
+        *)
+            not_implemented "check package manager for $(detect_os)"
+            ;;
+    esac
+}
+
+install_linux() {
+    local package="${1}"
+
+    case "$(detect_distro)" in
+        "debian")
+            sudo apt-get install -y "${package}" > /dev/null
+            ;;
+        "fedora")
+            sudo dnf install -y "${package}" > /dev/null
+            ;;
+        *)
+            not_implemented "linux install for $(detect_distro)"
+            ;;
+    esac
+}
+
+install_macos() {
+    brew install -f "${package}" > /dev/null
 }
 
 install() {
@@ -130,15 +187,15 @@ install() {
     if ! check "${package}"; then
         log "installing ${package}"
 
-        case "$(detect_distro)" in
-            "debian")
-                sudo apt-get install -y "${package}" > /dev/null
+        case "$(detect_os)" in
+            "linux")
+                install_linux "${package}"
                 ;;
-            "fedora")
-                sudo dnf install -y "${package}" > /dev/null
+            "macos")
+                install_macos "${package}"
                 ;;
             *)
-                not_implemented
+                not_implemented "install for $(detect_os)"
                 ;;
         esac
     fi
@@ -157,37 +214,18 @@ link() {
     fi
 }
 
-update_locale() {
-    if [[ "${LANG}" != "${LOCALE}" ]]; then
-        log "update locale to ${LOCALE}"
-
-        if [[ "$(detect_distro)" == "debian" ]]; then
-            sudo locale-gen "${LOCALE}"
-        fi
-
-        if is_wsl; then
-            sudo update-locale "LANG=${LOCALE}"
-        else
-            sudo localectl set-locale "LANG=${LOCALE}"
-        fi
-        error "locale changed, open a new shell and run again"
-    fi
-}
-
-update_hostname() {
-    log "current hostname is $(hostname)"
-
-    if ask "do you want to update the hostname?"; then
-        read -rp "new hostname: " new_hostname
-
-        log "updating hostname to ${new_hostname}"
-        sudo hostnamectl set-hostname "${new_hostname}"
-    fi
-}
-
-add_user_groups() {
-    log "adding $(whoami) to systemd-journal"
-    sudo usermod -a -G systemd-journal "$(whoami)"
+os_awk() {
+    case "$(detect_os)" in
+        "linux")
+            awk "$@"
+            ;;
+        "macos")
+            gawk "$@"
+            ;;
+        *)
+            not_implemented "gawk for $(detect_os)"
+            ;;
+    esac
 }
 
 setup_bin_dir() {
@@ -209,7 +247,7 @@ setup_ssh_dir() {
     fi
 
     curl -fsSL "https://github.com/${GITHUB_USER}.keys" >> "${ssh_dir}/authorized_keys"
-    awk -i inplace '!seen[$0]++' "${ssh_dir}/authorized_keys"
+    os_awk -i inplace '!seen[$0]++' "${ssh_dir}/authorized_keys"
 }
 
 setup_repos_dir() {
@@ -220,11 +258,6 @@ setup_repos_dir() {
         log "cloning dotfiles"
         git clone -q git@github.com:angelini/dotfiles.git "${DOTFILES_DIR}"
     fi
-}
-
-setup_vms_dir() {
-    log "setting up vms directory"
-    mkdir -p "${HOME}/vms"
 }
 
 test_github_keys() {
@@ -247,7 +280,6 @@ link_configs() {
     link "gitconfig"
     link "gitignore_global"
 
-    link "flake8" "${CONFIG_DIR}/flake8"
     link "starship.toml" "${CONFIG_DIR}/starship.toml"
 
     log "resetting bashrc"
@@ -297,14 +329,25 @@ install_github_tar() {
 }
 
 install_utilities() {
+    if [[ "$(detect_os)" == "linux" ]]; then
+        install "ca-certificates"
+        install "gnupg2"
+        install "fd-find"
+
+        install_github_tar "dust" \
+            "dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu/dust" \
+            "https://github.com/bootandy/dust/releases/download/v${DUST_VERSION}/dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+    fi
+
+    if [[ "$(detect_os)" == "macos" ]]; then
+        install "gnupg"
+        install "fd"
+    fi
+
     install "bash-completion"
-    install "ca-certificates"
-    install "fd-find"
     install "findutils"
-    install "gnupg2"
     install "htop"
     install "jq"
-    install "keychain"
     install "ripgrep"
     install "tree"
     install "vim"
@@ -318,25 +361,6 @@ install_utilities() {
         install "apt-transport-https"
         install "fontconfig"
         install "unzip"
-    fi
-
-    install_github_tar "dust" \
-        "dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu/dust" \
-        "https://github.com/bootandy/dust/releases/download/v${DUST_VERSION}/dust-v${DUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-}
-
-install_pyenv() {
-    local pyenv_dir="${HOME}/.pyenv"
-
-    if ! bin_exists "pyenv"; then
-        log "installing pyenv"
-        git clone -q https://github.com/yyuu/pyenv.git "${pyenv_dir}"
-
-        (
-            cd "${pyenv_dir}"
-            src/configure
-            make -C src
-        )
     fi
 }
 
@@ -354,24 +378,12 @@ install_nvm() {
     fi
 }
 
-install_java() {
-    if ! bin_exists "java"; then
-        case "$(detect_distro)" in
-            "debian")
-                install "openjdk-11-jdk"
-                ;;
-            "fedora")
-                install "java-11-openjdk-devel"
-                ;;
-            *)
-                not_implemented
-                ;;
-        esac
-    fi
-}
-
 install_go() {
     if ! bin_exists "go"; then
+        if [[ "$(detect_os)" == "macos" ]]; then
+            not_implemented "macos install go"
+        fi
+
         log "installing go"
 
         case "$(detect_arch)" in
@@ -381,17 +393,19 @@ install_go() {
             "arm")
                 curl -fsSL -o "/tmp/golang.tar.gz" "https://golang.org/dl/go${GO_VERSION}.linux-arm64.tar.gz"
                 ;;
+            *)
+                not_implemented "linux install go for $(detect_arch)"
+                ;;
         esac
         sudo tar -C "/usr/local" -xzf "/tmp/golang.tar.gz"
     fi
 }
 
 install_dev_toolchains() {
-    install "clang"
-    install "protobuf-compiler"
-    install "ruby"
+    install "python"
 
     if [[ "$(detect_distro)" == "fedora" ]]; then
+        install "clang"
         install "bzip2-devel"
         install "libffi-devel"
         install "nss-tools"
@@ -403,6 +417,7 @@ install_dev_toolchains() {
     fi
 
     if [[ "$(detect_distro)" == "debian" ]]; then
+        install "clang"
         install "build-essential"
         install "libbz2-dev"
         install "libffi-dev"
@@ -415,64 +430,49 @@ install_dev_toolchains() {
         install "zlib1g-dev"
     fi
 
-    case "$(detect_arch)" in
-        "x86")
-            install_github_bin "ejson" \
-                "https://github.com/Shopify/ejson/releases/download/v${EJSON_VERSION}/linux-amd64"
-            install_github_bin "mkcert" \
-                "https://github.com/FiloSottile/mkcert/releases/download/v${MKCERT_VERSION}/mkcert-v${MKCERT_VERSION}-linux-amd64"
-
+    case "$(detect_os_and_arch)" in
+        "linux-x86")
             install_github_tar "helm" \
                 "linux-amd64/helm" \
                 "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
             ;;
-        "arm")
-            install_github_bin "ejson" \
-                "https://github.com/Shopify/ejson/releases/download/v${EJSON_VERSION}/linux-arm64"
-            install_github_bin "mkcert" \
-                "https://github.com/FiloSottile/mkcert/releases/download/v${MKCERT_VERSION}/mkcert-v${MKCERT_VERSION}-linux-arm64"
-
+        "linux-arm")
             install_github_tar "helm" \
                 "linux-arm64/helm" \
                 "https://get.helm.sh/helm-v${HELM_VERSION}-linux-arm64.tar.gz"
             ;;
+        "macos-arm")
+            install_github_tar "helm" \
+                "darwin-arm64/helm" \
+                "https://get.helm.sh/helm-v${HELM_VERSION}-darwin-arm64.tar.gz"
+            ;;
+        *)
+            not_implemented "install helm for $(detect_os_and_arch)"
+            ;;
     esac
 
-    install_pyenv
     install_rustup
     install_nvm
-    install_java
     install_go
-
-    if [[ "$(pyenv global)" != "${PYTHON_VERSION}" ]]; then
-        pyenv install "${PYTHON_VERSION}" --skip-existing
-        pyenv global "${PYTHON_VERSION}"
-    fi
-
-    pip install --upgrade pip > /dev/null
 }
 
-install_font() {
-    local name="${1}"
-    local uri="${2}"
-    local font_zip="${uri##*/}"
-    local fonts_dir="${HOME}/.fonts"
+install_kitty() {
+    if ! bin_exists "kitty"; then
+        log "installing kitty"
+        curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
-    if ! fc-list | grep "${name}" &> /dev/null; then
-        log "installing font ${font_zip}"
-
-        mkdir -p "${fonts_dir}"
-
-        curl -fsSLO "${uri}"
-        unzip -o "${font_zip}" -d "${fonts_dir}" > /dev/null
-        fc-cache -fv > /dev/null
-        rm "${font_zip}"
+        mkdir -p "${CONFIG_DIR}/kitty"
+        link "kitty.conf" "${CONFIG_DIR}/kitty/kitty.conf"
     fi
-}
 
-install_fonts() {
-    install_font "Ubuntu Mono Nerd Font" \
-        "https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/UbuntuMono.zip"
+    if [[ ! -d "${CONFIG_DIR}/kitty/kitty-themes" ]]; then
+        log "installing kitty-themese"
+        git clone --depth 1 https://github.com/dexpota/kitty-themes.git "${CONFIG_DIR}/kitty/kitty-themes"
+        (
+            cd "${CONFIG_DIR}/kitty"
+            ln -s "./kitty-themes/themes/Solarized_Light.conf"
+        )
+    fi
 }
 
 install_starship() {
@@ -490,22 +490,19 @@ source_bashrc() {
     set -u
 }
 
-install_gcp_cli() {
-    if ! bin_exists "gcloud"; then
-        log "installing gcp cli"
+install_gcp_cli_repo() {
+    case "$(detect_distro)" in
+        "debian")
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+                | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
 
-        case "$(detect_distro)" in
-            "debian")
-                echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
-                    | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
+            curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+                | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - > /dev/null
 
-                curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
-                    | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - > /dev/null
-
-                update_package_manager
-                ;;
-            "fedora")
-                sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo <<- EOM > /dev/null
+            update_package_manager
+            ;;
+        "fedora")
+            sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo <<- EOM > /dev/null
 [google-cloud-sdk]
 name=Google Cloud SDK
 baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
@@ -513,43 +510,34 @@ enabled=1
 gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
-    https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOM
-                ;;
-            *)
-                not_implemented
-                ;;
-        esac
+            ;;
+        "macos")
+            curl -fsSL -o "/tmp/gcloud.tar.gz" "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-darwin-arm.tar.gz"
+            ;;
+        *)
+            not_implemented
+            ;;
+    esac
+}
+
+install_gcp_cli() {
+    if ! bin_exists "gcloud"; then
+        log "installing gcp cli"
+
+        if [[ "$(detect_os)" == "linux" ]]; then
+            install_gcp_cli_repo
+        fi
 
         install "google-cloud-sdk"
         gcloud init --skip-diagnostics
     fi
 }
 
-install_aws_cli() {
-    if ! bin_exists "aws"; then
-        log "installing aws cli"
-
-        case "$(detect_arch)" in
-            "x86")
-                curl -fsSL -o "/tmp/awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
-                ;;
-            "arm")
-                curl -fsSL -o "/tmp/awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip"
-                ;;
-        esac
-
-        unzip -o "/tmp/awscliv2.zip" -d "${CLOUD_DIR}" > /dev/null
-        sudo "${CLOUD_DIR}/aws/install"
-    fi
-}
-
 setup_cloud_dir() {
-    log "setting up cloud directory"
     mkdir -p "${CLOUD_DIR}"
-
     install_gcp_cli
-    install_aws_cli
 }
 
 main() {
@@ -559,26 +547,21 @@ main() {
     local os=$(detect_os)
     log "detected os:     ${os}"
 
-    if [[ "${os}" != "linux" ]]; then
-        error "script only supports linux"
-    fi
-
     local distro="$(detect_distro)"
     local arch="$(detect_arch)"
     log "detected distro: ${distro}"
     log "detected arch:   ${arch}"
 
-    add_user_groups
-    update_locale
-    update_hostname
     update_package_manager
+
+    if [[ "$(detect_os)" == "macos" ]]; then
+        install "gawk"
+    fi
 
     setup_bin_dir
     setup_ssh_dir
-    setup_vms_dir
 
     test_github_keys
-    install "git"
     setup_repos_dir
 
     install_alias_complete
@@ -591,7 +574,7 @@ main() {
 
     setup_cloud_dir
 
-    install_fonts
+    install_kitty
     install_starship
 
     source_bashrc

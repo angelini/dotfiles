@@ -12,12 +12,11 @@ alias gpfo='git push origin +$(git rev-parse --abbrev-ref HEAD)'
 alias gl="git log --graph --pretty=format:'%Cred%h%Creset %Creset%Cblue%an%Creset %s %Cgreen(%cr)%Cred%d%Creset' --abbrev-commit --date=relative --max-count=25"
 alias rgc="rg -C 30"
 alias ip="ip -c=auto"
+
 alias sct="systemctl status"
 complete -F _complete_alias sct
 alias sc="sudo systemctl"
 complete -F _complete_alias sc
-
-# Gadget
 
 pod_names() {
     local ns="${1}"
@@ -25,19 +24,3 @@ pod_names() {
 
     kubectl -n "${ns}" get pods -l "${filter}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'
 }
-
-alias kcg="kubectl -n gadget-app-sandbox-development"
-alias kct="kubectl -n gadget-app-sandbox-test"
-
-alias gsp="pod_names gadget-app-sandbox-development environmentName=js-sandbox"
-alias gst="pod_names gadget-app-sandbox-test environmentName=js-sandbox"
-
-# Fusion
-
-alias kf="/home/alex/repos/fusion/bin/k3s kubectl"
-alias kff="/home/alex/repos/fusion/bin/k3s kubectl -n fusion"
-
-# Mesh
-
-alias km="/home/alex/repos/mesh/bin/k3s kubectl"
-alias kmm="/home/alex/repos/mesh/bin/k3s kubectl -n mesh"
